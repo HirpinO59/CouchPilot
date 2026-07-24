@@ -12,12 +12,6 @@ enum Settings {
             "scrollSpeed": 700.0,
             "precisionFactor": 0.25,
             "boostFactor": 2.0,
-            "actionL3": "mute",
-            "actionR3": "middleClick",
-            "actionDpadUp": "volumeUp",
-            "actionDpadDown": "volumeDown",
-            "actionDpadLeft": "previousTrack",
-            "actionDpadRight": "nextTrack",
             "language": "auto",
             "debugLog": false,
             "autoPauseGames": true,
@@ -25,10 +19,34 @@ enum Settings {
             "offsetRX": 0.0, "offsetRY": 0.0,
             "offsetLX": 0.0, "offsetLY": 0.0,
         ])
+        migrateOldBindings()
+    }
+
+    // Le assegnazioni prima stavano in chiavi separate (actionL3, actionDpadUp…):
+    // si trasferiscono una volta sola nel nuovo schema bind<ID>.
+    private static func migrateOldBindings() {
+        let d = UserDefaults.standard
+        guard !d.bool(forKey: "bindingsMigrated") else { return }
+        let map = ["actionL3": "bindL3", "actionR3": "bindR3",
+                   "actionDpadUp": "bindDpadUp", "actionDpadDown": "bindDpadDown",
+                   "actionDpadLeft": "bindDpadLeft", "actionDpadRight": "bindDpadRight"]
+        for (old, new) in map {
+            if let value = d.string(forKey: old), d.string(forKey: new) == nil {
+                d.set(value, forKey: new)
+            }
+            d.removeObject(forKey: old)
+        }
+        d.set(true, forKey: "bindingsMigrated")
+    }
+
+    // Riporta tutti i tasti alle azioni predefinite.
+    static func resetBindings() {
+        let d = UserDefaults.standard
+        for button in PadButton.all { d.removeObject(forKey: button.settingsKey) }
     }
 }
 
-// Snapshot dei parametri letto a ogni tick (UserDefaults tiene la cache in memoria).
+// Snapshot dei parametri, letto dal driver a intervalli regolari.
 struct Tunables {
     let deadzone: Double
     let exponent: Double
@@ -37,20 +55,17 @@ struct Tunables {
     let scrollSpeed: Double
     let precisionFactor: Double
     let boostFactor: Double
-    let actionL3: String
-    let actionR3: String
-    let actionDpadUp: String
-    let actionDpadDown: String
-    let actionDpadLeft: String
-    let actionDpadRight: String
     let debugLog: Bool
     let offsetRX: Double
     let offsetRY: Double
     let offsetLX: Double
     let offsetLY: Double
+    let bindings: [String: PadAction]
 
     static func load() -> Tunables {
         let d = UserDefaults.standard
+        var bindings: [String: PadAction] = [:]
+        for button in PadButton.all { bindings[button.id] = button.action }
         return Tunables(
             deadzone: d.double(forKey: "deadzone"),
             exponent: d.double(forKey: "exponent"),
@@ -59,17 +74,12 @@ struct Tunables {
             scrollSpeed: d.double(forKey: "scrollSpeed"),
             precisionFactor: d.double(forKey: "precisionFactor"),
             boostFactor: d.double(forKey: "boostFactor"),
-            actionL3: d.string(forKey: "actionL3") ?? "none",
-            actionR3: d.string(forKey: "actionR3") ?? "none",
-            actionDpadUp: d.string(forKey: "actionDpadUp") ?? "none",
-            actionDpadDown: d.string(forKey: "actionDpadDown") ?? "none",
-            actionDpadLeft: d.string(forKey: "actionDpadLeft") ?? "none",
-            actionDpadRight: d.string(forKey: "actionDpadRight") ?? "none",
             debugLog: d.bool(forKey: "debugLog"),
             offsetRX: d.double(forKey: "offsetRX"),
             offsetRY: d.double(forKey: "offsetRY"),
             offsetLX: d.double(forKey: "offsetLX"),
-            offsetLY: d.double(forKey: "offsetLY")
+            offsetLY: d.double(forKey: "offsetLY"),
+            bindings: bindings
         )
     }
 }

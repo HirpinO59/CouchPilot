@@ -30,8 +30,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var loginItem: NSMenuItem!
     private var axItem: NSMenuItem!
     private let exclusionsMenu = NSMenu()
-    // sottomenu di scelta azione, uno per pulsante configurabile
-    private var buttonMenus: [(menu: NSMenu, key: String)] = []
     private let languageMenu = NSMenu()
     private var rootMenu: NSMenu?
     private var presetSubmenus: [(menu: NSMenu, key: String)] = []
@@ -160,13 +158,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             }
             return
         }
-        if let entry = buttonMenus.first(where: { $0.menu === menu }) {
-            let selected = UserDefaults.standard.string(forKey: entry.key)
-            for item in menu.items {
-                item.state = (item.representedObject as? String) == selected ? .on : .off
-            }
-            return
-        }
         if menu === languageMenu {
             for item in menu.items {
                 item.state = (item.representedObject as? String) == L.current.rawValue ? .on : .off
@@ -225,12 +216,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
-    @objc private func selectPadAction(_ sender: NSMenuItem) {
-        guard let raw = sender.representedObject as? String,
-              let key = buttonMenus.first(where: { $0.menu === sender.menu })?.key else { return }
-        UserDefaults.standard.set(raw, forKey: key)
-    }
-
     @objc private func selectPreset(_ sender: NSMenuItem) {
         guard let value = sender.representedObject as? Double,
               let key = presetSubmenus.first(where: { $0.menu === sender.menu })?.key else { return }
@@ -247,7 +232,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func resetSettings() {
         ["maxSpeed", "scrollSpeed", "deadzone", "scrollDeadzone", "exponent",
-         "precisionFactor", "boostFactor", "actionL3", "actionR3"].forEach {
+         "precisionFactor", "boostFactor"].forEach {
             UserDefaults.standard.removeObject(forKey: $0)
         }
     }
@@ -290,6 +275,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         axItem = NSMenuItem(title: L.t("menu.accessibility"), action: #selector(openAX), keyEquivalent: "")
         axItem.target = self
         menu.addItem(axItem)
+
+        let keybindsItem = NSMenuItem(title: L.t("menu.keybinds"),
+                                      action: #selector(openKeybinds), keyEquivalent: "")
+        keybindsItem.target = self
+        menu.addItem(keybindsItem)
 
         let guideItem = NSMenuItem(title: L.t("menu.welcome"), action: #selector(openWelcome), keyEquivalent: "")
         guideItem.target = self
@@ -368,33 +358,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         settingsMenu.addItem(.separator())
 
-        buttonMenus.removeAll()
-        let buttonsMenu = NSMenu()
-        buttonsMenu.autoenablesItems = false
-        let buttons: [(String, String)] = [
-            ("menu.buttonL3", "actionL3"), ("menu.buttonR3", "actionR3"),
-            ("menu.dpadUp", "actionDpadUp"), ("menu.dpadDown", "actionDpadDown"),
-            ("menu.dpadLeft", "actionDpadLeft"), ("menu.dpadRight", "actionDpadRight"),
-        ]
-        for (titleKey, key) in buttons {
-            let submenu = NSMenu()
-            submenu.autoenablesItems = false
-            submenu.delegate = self
-            for action in PadAction.allCases {
-                let item = NSMenuItem(title: action.title, action: #selector(selectPadAction(_:)), keyEquivalent: "")
-                item.target = self
-                item.representedObject = action.rawValue
-                submenu.addItem(item)
-            }
-            buttonMenus.append((submenu, key))
-            let holder = NSMenuItem(title: L.t(titleKey), action: nil, keyEquivalent: "")
-            holder.submenu = submenu
-            buttonsMenu.addItem(holder)
-            if key == "actionR3" { buttonsMenu.addItem(.separator()) }
-        }
-        let buttonsItem = NSMenuItem(title: L.t("menu.buttons"), action: nil, keyEquivalent: "")
-        buttonsItem.submenu = buttonsMenu
-        settingsMenu.addItem(buttonsItem)
 
         settingsMenu.addItem(.separator())
 
@@ -539,6 +502,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             Log.write("errore login item: \(error.localizedDescription)")
         }
         refreshUI()
+    }
+
+    @objc private func openKeybinds() {
+        WelcomeWindow.showKeybinds(controller: controllerName)
     }
 
     @objc private func openWelcome() {

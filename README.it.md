@@ -49,6 +49,7 @@ In cima al menu c'è il controller collegato con un **indicatore di batteria in 
 Da dove arriva il dato: `GCController.battery` è la via ufficiale e funziona su DualSense e simili, ma **sui pad Xbox via Bluetooth riporta livello 0 e stato sconosciuto** (verificato su macOS 26). Il livello reale sta nello stack Bluetooth e si legge con `system_profiler SPBluetoothDataType -json` (~0,2 s), eseguito fuori dal thread principale. L'app prova prima la via ufficiale e ripiega sulla seconda.
 
 - **Attivo** — toggle on/off (equivale a View + Menu insieme: spegne subito, tenuti 2 s riaccende)
+- **Configurazione tasti** — schermata con il disegno del pad collegato e, per ogni tasto, l'azione assegnata: si clicca l'azione, si sceglie la nuova, diventa gialla e si salva. Tutti i tasti sono riassegnabili tranne View e Menu, riservati al comando di accensione
 - **Guida rapida** — tre schede con i comandi, mostrate una sola volta al primo avvio e richiamabili da qui. La terza mostra lo schema del pad collegato (Xbox o DualSense) con le didascalie tradotte, disegnate dal codice sopra l'immagine in `Resources/`. I media facoltativi (welcome1/2/3) sostituiscono lo schema se presenti
 - **Calibra stick** — campiona 2 secondi a stick fermi e salva l'offset di riposo (per il drift)
 - **Impostazioni** — tutta la configurazione in un posto solo, effetto immediato:

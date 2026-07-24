@@ -1,8 +1,10 @@
 import Foundation
 
-// Azioni assegnabili ai pulsanti configurabili (L3, R3, D-pad) dal menu.
+// Azioni assegnabili ai tasti del controller.
 enum PadAction: String, CaseIterable {
     case none
+    case leftClick
+    case rightClick
     case middleClick
     case mute
     case playPause
@@ -14,6 +16,8 @@ enum PadAction: String, CaseIterable {
     case brightnessDown
     case missionControl
     case showDesktop
+    case spaceLeft
+    case spaceRight
     case screenshotArea
 
     var title: String {
@@ -23,8 +27,12 @@ enum PadAction: String, CaseIterable {
         }
     }
 
-    // Azioni che ha senso ripetere tenendo premuto: alzare il volume di un
-    // passo alla volta sarebbe scomodo, cambiare traccia a raffica no.
+    // Click che devono restare premuti: il trascinamento nasce da qui.
+    var isHold: Bool {
+        self == .leftClick || self == .rightClick
+    }
+
+    // Azioni sensate da ripetere tenendo premuto il tasto.
     var repeatsWhenHeld: Bool {
         switch self {
         case .volumeUp, .volumeDown, .brightnessUp, .brightnessDown: return true

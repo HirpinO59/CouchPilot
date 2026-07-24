@@ -1,21 +1,22 @@
 import AppKit
 
-// Guida rapida: tre schede, mostrate una volta sola al primo avvio e poi
-// richiamabili dal menu. Senza questa finestra l'app, non avendo icona nel
-// Dock né interfaccia, sembrerebbe non essersi installata.
+// Guida rapida in tre schede: le prime due spiegano, la terza è la
+// configurazione dei tasti, raggiungibile anche direttamente dal menu.
+// Senza questa finestra l'app, non avendo icona nel Dock né interfaccia,
+// sembrerebbe non essersi installata.
 final class WelcomeWindow: NSWindowController {
     private struct Slide {
         let titleKey: String
         let bodyKey: String
-        let media: String // file in Resources, senza estensione
-        var showsDiagram = false
+        let media: String
+        var isConfig = false
     }
 
     private let slides = [
         Slide(titleKey: "welcome.1.title", bodyKey: "welcome.1.body", media: "welcome1"),
         Slide(titleKey: "welcome.2.title", bodyKey: "welcome.2.body", media: "welcome2"),
         Slide(titleKey: "welcome.3.title", bodyKey: "welcome.3.body", media: "welcome3",
-              showsDiagram: true),
+              isConfig: true),
     ]
     private var index = 0
     private static var controllerName: String?
@@ -23,21 +24,31 @@ final class WelcomeWindow: NSWindowController {
     private let titleLabel = NSTextField(labelWithString: "")
     private let bodyLabel = NSTextField(wrappingLabelWithString: "")
     private let imageView = NSImageView()
-    private let nextButton = NSButton()
+    private var configView: ControllerConfigView!
     private let dots = NSStackView()
+    private let nextButton = NSButton()
+    private let resetButton = NSButton()
+    private let saveButton = NSButton()
+    private var buttonRow: NSStackView!
     private var contentStack: NSStackView?
 
     private static var shared: WelcomeWindow?
 
-    static func show(controller: String? = nil) {
+    static func show(controller: String? = nil, atConfig: Bool = false) {
         if controller != nil { controllerName = controller }
         if shared == nil { shared = WelcomeWindow() }
-        shared?.index = 0
-        shared?.render()
+        guard let window = shared else { return }
+        window.configView.update(controller: controllerName)
+        window.index = atConfig ? window.slides.count - 1 : 0
+        window.render()
         NSApp.activate(ignoringOtherApps: true)
-        shared?.window?.center()
-        shared?.showWindow(nil)
-        shared?.window?.makeKeyAndOrderFront(nil)
+        window.window?.center()
+        window.showWindow(nil)
+        window.window?.makeKeyAndOrderFront(nil)
+    }
+
+    static func showKeybinds(controller: String? = nil) {
+        show(controller: controller, atConfig: true)
     }
 
     // Mostrata una sola volta; il menu resta la via per rivederla.
@@ -74,6 +85,12 @@ final class WelcomeWindow: NSWindowController {
         imageView.layer?.masksToBounds = true
         imageView.layer?.backgroundColor = NSColor.quaternaryLabelColor.withAlphaComponent(0.25).cgColor
 
+        configView = ControllerConfigView(controller: Self.controllerName)
+        configView.translatesAutoresizingMaskIntoConstraints = false
+        configView.onChangesChanged = { [weak self] hasChanges in
+            self?.saveButton.isEnabled = hasChanges
+        }
+
         titleLabel.font = .systemFont(ofSize: 22, weight: .semibold)
         titleLabel.alignment = .center
         titleLabel.lineBreakMode = .byWordWrapping
@@ -96,13 +113,24 @@ final class WelcomeWindow: NSWindowController {
             dots.addArrangedSubview(dot)
         }
 
-        nextButton.bezelStyle = .push
-        nextButton.controlSize = .large
-        nextButton.keyEquivalent = "\r"
-        nextButton.target = self
+        for button in [nextButton, resetButton, saveButton] {
+            button.bezelStyle = .push
+            button.controlSize = .large
+            button.target = self
+        }
         nextButton.action = #selector(advance)
+        nextButton.keyEquivalent = "\r"
+        resetButton.action = #selector(resetBindings)
+        saveButton.action = #selector(saveBindings)
+        saveButton.isEnabled = false
 
-        let stack = NSStackView(views: [imageView, titleLabel, bodyLabel, dots, nextButton])
+        let spacer = NSView()
+        spacer.setContentHuggingPriority(.init(1), for: .horizontal)
+        buttonRow = NSStackView(views: [resetButton, spacer, saveButton, nextButton])
+        buttonRow.orientation = .horizontal
+        buttonRow.spacing = 10
+
+        let stack = NSStackView(views: [imageView, configView, titleLabel, bodyLabel, dots, buttonRow])
         stack.orientation = .vertical
         stack.alignment = .centerX
         stack.spacing = 16
@@ -119,6 +147,8 @@ final class WelcomeWindow: NSWindowController {
             imageView.heightAnchor.constraint(equalToConstant: 190),
             bodyLabel.widthAnchor.constraint(equalToConstant: 440),
             titleLabel.widthAnchor.constraint(equalToConstant: 440),
+            configView.widthAnchor.constraint(equalToConstant: 700),
+            configView.heightAnchor.constraint(equalToConstant: 430),
         ])
         stack.setCustomSpacing(24, after: bodyLabel)
         contentStack = stack
@@ -133,15 +163,30 @@ final class WelcomeWindow: NSWindowController {
         render()
     }
 
+    @objc private func saveBindings() {
+        configView.save()
+    }
+
+    @objc private func resetBindings() {
+        configView.resetToDefaults()
+    }
+
     private func render() {
         let slide = slides[index]
         titleLabel.stringValue = L.t(slide.titleKey)
         bodyLabel.stringValue = L.t(slide.bodyKey)
 
-        // Il file nel bundle ha la precedenza (le GIF dimostrative); in sua
-        // assenza la terza scheda disegna lo schema del controller.
-        let image = NSImage.bundled(named: slide.media)
-            ?? (slide.showsDiagram ? ControllerDiagram.image(controller: Self.controllerName) : nil)
+        configView.isHidden = !slide.isConfig
+        bodyLabel.isHidden = slide.isConfig
+        resetButton.isHidden = !slide.isConfig
+        saveButton.isHidden = !slide.isConfig
+        buttonRow.alignment = slide.isConfig ? .centerY : .centerY
+
+        resetButton.title = L.t("keybinds.reset")
+        saveButton.title = L.t("keybinds.save")
+        nextButton.title = index == slides.count - 1 ? L.t("welcome.done") : L.t("welcome.next")
+
+        let image = slide.isConfig ? nil : NSImage.bundled(named: slide.media)
         imageView.image = image
         imageView.isHidden = image == nil
         imageView.animates = true
@@ -151,16 +196,17 @@ final class WelcomeWindow: NSWindowController {
                 ? NSColor.controlAccentColor
                 : NSColor.quaternaryLabelColor).cgColor
         }
-
-        nextButton.title = index == slides.count - 1 ? L.t("welcome.done") : L.t("welcome.next")
         window?.title = "CouchPilot"
+        configView.needsDisplay = true
 
-        // la finestra si adatta alla scheda: i testi cambiano lunghezza tra le
-        // schede e tra le lingue, un'altezza fissa taglierebbe qualcosa
+        // la finestra si adatta alla scheda: la configurazione è larga, le
+        // schede di testo no, e le lingue occupano altezze diverse
         contentStack?.layoutSubtreeIfNeeded()
         if let fitting = contentStack?.fittingSize {
-            window?.setContentSize(NSSize(width: 520, height: fitting.height + 24))
+            window?.setContentSize(NSSize(width: slide.isConfig ? 760 : 520,
+                                          height: fitting.height + 24))
         }
+        window?.invalidateCursorRects(for: configView)
     }
 }
 

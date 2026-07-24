@@ -62,31 +62,20 @@ final class CursorDriver {
     private var calibSamples = 0
     private var calibSum = (rx: 0.0, ry: 0.0, lx: 0.0, ly: 0.0)
 
-    // fase 2: stato dei pulsanti di sistema
-    private var prevY = false
-    private var prevB = false
-    private var prevLB = false
-    private var prevRB = false
-    private var prevView = false
-    private var prevL3 = false
-    private var prevR3 = false
+    // Stato dei tasti assegnabili, per id.
+    private struct ButtonState {
+        var pressed = false
+        var since = 0.0
+        var lastRepeat = 0.0
+    }
+    private var buttonStates: [String: ButtonState] = [:]
+
     // View + Menu insieme. Spegnere è immediato (serve al volo, quando il pad
     // deve tornare a un'altra app); riaccendere richiede due secondi, così non
     // succede per sbaglio mentre il pad è in mano per altro.
     private var togglePairFired = false
     private var comboHeldSince = 0.0
     private static let comboHoldToEnable = 2.0
-
-    // Stato di una direzione del D-pad: quando è stata premuta e l'ultima
-    // ripetizione, per le azioni che si ripetono tenendo premuto.
-    private struct HeldDirection {
-        var since = 0.0
-        var lastRepeat = 0.0
-    }
-    private var dpadUp = HeldDirection()
-    private var dpadDown = HeldDirection()
-    private var dpadLeft = HeldDirection()
-    private var dpadRight = HeldDirection()
 
     // callback sul main thread
     var onEnabledChanged: ((Bool) -> Void)?
@@ -99,6 +88,7 @@ final class CursorDriver {
             self.wasMoving = false
             self.togglePairFired = false
             self.comboHeldSince = 0
+            self.buttonStates.removeAll()
             self.tunables = Tunables.load()
             self.syncPositionFromSystem()
             guard self.timer == nil else { return }
@@ -135,7 +125,7 @@ final class CursorDriver {
                 // una pressione iniziata prima della pausa non deve valere al rientro
                 self.togglePairFired = false
                 self.comboHeldSince = 0
-                self.prevView = false
+                self.buttonStates.removeAll()
             }
         }
     }
@@ -231,17 +221,6 @@ final class CursorDriver {
         }
         wasMoving = moving
 
-        // pulsanti: A = click sinistro, X = click destro (B libero per la fase 2)
-        let a = pad.buttonA.isPressed
-        let b = pad.buttonX.isPressed
-        if a != leftDown || b != rightDown {
-            let p = moving ? CGPoint(x: posX.rounded(), y: posY.rounded()) : Self.systemLocation()
-            posX = p.x
-            posY = p.y
-            if a != leftDown { leftDown = a; poster.left(down: a, at: p) }
-            if b != rightDown { rightDown = b; poster.right(down: b, at: p) }
-        }
-
         pollSystemButtons(pad, tunables: s, now: now)
 
         // stick destro -> scroll
@@ -270,52 +249,50 @@ final class CursorDriver {
         }
     }
 
-    // fase 2: pulsanti -> funzioni di sistema (mappatura in README)
+    // Ogni tasto esegue l'azione che gli è stata assegnata (Keybinds.swift).
     private func pollSystemButtons(_ pad: GCExtendedGamepad, tunables s: Tunables, now: Double) {
-        // Y = play/pausa
-        let y = pad.buttonY.isPressed
-        if y && !prevY { poster.mediaKey(.play) }
-        prevY = y
+        var wantLeft = false
+        var wantRight = false
 
-        // B = Mission Control (scorciatoia letta dalle impostazioni di sistema)
-        let b = pad.buttonB.isPressed
-        if b && !prevB { poster.systemShortcut(.missionControl) }
-        prevB = b
+        for button in PadButton.all {
+            let action = s.bindings[button.id] ?? .none
+            let pressed = button.isPressed(pad)
+            var state = buttonStates[button.id] ?? ButtonState()
 
-        // LB / RB = Space precedente / successivo
-        let lb = pad.leftShoulder.isPressed
-        if lb && !prevLB { poster.systemShortcut(.spaceLeft) }
-        prevLB = lb
-        let rb = pad.rightShoulder.isPressed
-        if rb && !prevRB { poster.systemShortcut(.spaceRight) }
-        prevRB = rb
+            if action.isHold {
+                // il click resta premuto finché il tasto è premuto: il drag esce da qui
+                if pressed {
+                    if action == .leftClick { wantLeft = true } else { wantRight = true }
+                }
+            } else if pressed && !state.pressed {
+                state.since = now
+                state.lastRepeat = now
+                perform(action)
+            } else if pressed, action.repeatsWhenHeld,
+                      now - state.since > 0.4, now - state.lastRepeat > 0.12 {
+                state.lastRepeat = now
+                perform(action)
+            }
 
-        // View (⧉) = Mostra Scrivania, al rilascio: se nel frattempo è stato
-        // premuto anche Menu, la combinazione ha già fatto il toggle e questa
-        // azione va saltata.
-        let view = pad.buttonOptions?.isPressed ?? false
-        if prevView && !view && !togglePairFired { poster.systemShortcut(.showDesktop) }
-        prevView = view
+            state.pressed = pressed
+            buttonStates[button.id] = state
+        }
 
-        // D-pad: quattro direzioni configurabili. Impostandole su "nessuna
-        // azione" restano libere per la navigazione che macOS fa da sé col pad.
-        direction(pad.dpad.up.isPressed, s.actionDpadUp, &dpadUp, now)
-        direction(pad.dpad.down.isPressed, s.actionDpadDown, &dpadDown, now)
-        direction(pad.dpad.left.isPressed, s.actionDpadLeft, &dpadLeft, now)
-        direction(pad.dpad.right.isPressed, s.actionDpadRight, &dpadRight, now)
+        applyMouseButtons(left: wantLeft, right: wantRight)
+    }
 
-        // L3 / R3 = azione configurabile dal menu
-        let l3 = pad.leftThumbstickButton?.isPressed ?? false
-        if l3 && !prevL3 { perform(PadAction(rawValue: s.actionL3) ?? .none) }
-        prevL3 = l3
-        let r3 = pad.rightThumbstickButton?.isPressed ?? false
-        if r3 && !prevR3 { perform(PadAction(rawValue: s.actionR3) ?? .none) }
-        prevR3 = r3
+    private func applyMouseButtons(left: Bool, right: Bool) {
+        guard left != leftDown || right != rightDown else { return }
+        let p = wasMoving ? CGPoint(x: posX.rounded(), y: posY.rounded()) : Self.systemLocation()
+        posX = p.x
+        posY = p.y
+        if left != leftDown { leftDown = left; poster.left(down: left, at: p) }
+        if right != rightDown { rightDown = right; poster.right(down: right, at: p) }
     }
 
     private func perform(_ action: PadAction) {
         switch action {
-        case .none: break
+        case .none, .leftClick, .rightClick: break // gestiti come pressione continua
         case .middleClick: poster.middleClick(at: Self.systemLocation())
         case .mute: poster.mediaKey(.mute)
         case .playPause: poster.mediaKey(.play)
@@ -327,23 +304,9 @@ final class CursorDriver {
         case .brightnessDown: poster.mediaKey(.brightnessDown)
         case .missionControl: poster.systemShortcut(.missionControl)
         case .showDesktop: poster.systemShortcut(.showDesktop)
+        case .spaceLeft: poster.systemShortcut(.spaceLeft)
+        case .spaceRight: poster.systemShortcut(.spaceRight)
         case .screenshotArea: poster.keyCombo(21, [.maskCommand, .maskShift]) // Cmd+Shift+4
-        }
-    }
-
-    private func direction(_ pressed: Bool, _ raw: String, _ state: inout HeldDirection, _ now: Double) {
-        guard pressed else {
-            state = HeldDirection()
-            return
-        }
-        let action = PadAction(rawValue: raw) ?? .none
-        if state.since == 0 {
-            state.since = now
-            state.lastRepeat = now
-            perform(action)
-        } else if action.repeatsWhenHeld, now - state.since > 0.4, now - state.lastRepeat > 0.12 {
-            state.lastRepeat = now
-            perform(action)
         }
     }
 

@@ -32,7 +32,7 @@ Written in Swift with **zero external dependencies** and **zero data collection*
 - **Media keys**: play/pause, volume with hold-to-repeat, previous/next track
 - **Mission Control, Spaces, Show Desktop** — invoked through *your* configured macOS shortcuts, so remappings are respected
 - **Precision mode** (hold R2, ¼ speed) and **turbo** (hold L2, ×2) for cursor and scrolling
-- **Configurable stick buttons** (L3/R3): middle click, mute, brightness, screenshot and more
+- **Every button is remappable** from a visual keybinds screen: click an action next to the drawing of *your* controller, pick a new one, save. 12 buttons, 17 actions
 - **Controller battery indicator** in the menu, macOS style
 - **Auto-pause in games**: when a game or a chosen app (GeForce Now and Steam are preloaded) is frontmost, CouchPilot steps aside and the controller belongs to the game
 - **Localized**: English, Italian, Spanish, Simplified Chinese — follows the system language by default
@@ -56,6 +56,8 @@ Written in Swift with **zero external dependencies** and **zero data collection*
 | R2 (hold) | Precision: ¼ speed |
 | L2 (hold) | Turbo: ×2 speed |
 | L3 / R3 | Configurable — defaults: Mute / Middle click |
+
+Every button in this table can be reassigned from **Keybinds** in the menu — except View + Menu, reserved for the on/off command.
 | View (⧉) + Menu (☰) together | Off instantly · hold 2 s to switch back on |
 
 The app activates when a controller connects and deactivates when it disconnects (releasing any held button, so a drag never gets stuck).
