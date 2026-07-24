@@ -1,13 +1,26 @@
 # Fa comparire il bottone "Sponsor" in cima al repository.
 #
-# GitHub non ha una voce dedicata a PayPal: va sotto "custom", che accetta
-# fino a 4 indirizzi.
-#
-# ⚠️ SOSTITUISCI l'indirizzo qui sotto con il TUO link PayPal.me, poi togli
-# il cancelletto per attivarlo. Il link si ottiene da paypal.com/paypalme:
-# ha la forma https://paypal.me/NOMESCELTO
-#
-# Finché la riga resta commentata, il bottone non compare — meglio nessun
-# bottone che un bottone che manda i soldi a qualcun altro.
+# ⚠️ Nessuna riga è attiva: togli il cancelletto SOLO alla voce che vuoi usare,
+# dopo aver messo il tuo nome utente. Un bottone con l'indirizzo sbagliato
+# manderebbe i soldi a qualcun altro, quindi meglio nessun bottone.
 
-# custom: ["https://paypal.me/METTI-IL-TUO-NOME"]
+# --- Buy Me a Coffee (consigliato) ---------------------------------------
+# GitHub lo riconosce nativamente: bottone curato e nome utente al posto
+# dell'identità vera. Registrati su buymeacoffee.com, scegli il nome utente
+# e scrivilo qui sotto (solo il nome, senza l'indirizzo completo).
+# Trattiene una commissione del 5%.
+#
+# buy_me_a_coffee: NOMEUTENTE
+
+# --- PayPal --------------------------------------------------------------
+# GitHub non ha una voce dedicata: va sotto "custom". Il link si crea su
+# paypal.com/paypalme. Attenzione: la pagina PayPal mostra il nome del
+# titolare del conto, quindi rivela la tua identità vera.
+#
+# custom: ["https://paypal.me/NOMESCELTO"]
+
+# --- GitHub Sponsors -----------------------------------------------------
+# Nessuna commissione, ma richiede un conto collegato a Stripe e una
+# domanda di adesione da approvare.
+#
+# github: HirpinO59

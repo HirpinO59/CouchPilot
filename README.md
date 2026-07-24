@@ -139,6 +139,10 @@ Per-app profiles · custom keyboard shortcuts on buttons · D-pad as arrow keys
 
 Use **"Report an issue or idea…"** in the app menu — it opens a pre-filled issue with the technical details already attached (visible and editable before you send) — or [open an issue](../../issues) directly.
 
+## Support
+
+CouchPilot is free and always will be. If it saved you a trip across the room, you can [buy me a coffee](../../) — entirely optional, and it changes nothing about the app.
+
 ---
 
 © 2026 HirpinO. All rights reserved.
