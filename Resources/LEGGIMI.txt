@@ -18,3 +18,12 @@ GIF DIMOSTRATIVE — prime due schede
   welcome2.gif  media, volume, on/off
   Misura consigliata 880x400 px. Per convertirle:
     swift note-private/videotogif.swift clip.mov --fps 12 --width 880
+
+--------------------------------------------------------------------
+PROVENIENZA DI controller.png — DA RISOLVERE PRIMA DI PUBBLICARE
+L'immagine attuale è ricavata da un disegno fornito da Sebastiano
+(estrazione del tratto, rimozione logo e didascalie). È un'opera
+derivata: prima di rendere pubblico il repository va accertata la
+licenza della fonte, oppure sostituita con un disegno CC0 o nostro.
+Il codice non cambia: basta rimpiazzare il file.
+--------------------------------------------------------------------

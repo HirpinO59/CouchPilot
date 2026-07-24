@@ -41,12 +41,11 @@ enum ControllerDiagram {
     // L'ordine delle righe segue l'altezza degli agganci: le linee non si
     // incrociano mai.
     private static let callouts: [Callout] = [
-        Callout(anchor: CGPoint(x: -0.52, y: 0.14), labelKey: "diagram.cursor", onLeft: true, row: 0),
-        Callout(anchor: CGPoint(x: -0.13, y: 0.08), labelKey: "diagram.onoff", onLeft: true, row: 1),
-        Callout(anchor: CGPoint(x: -0.26, y: -0.28), labelKey: "diagram.volume", onLeft: true, row: 2),
-        Callout(anchor: CGPoint(x: 0.36, y: 0.14), labelKey: "diagram.rightClick", onLeft: false, row: 0),
-        Callout(anchor: CGPoint(x: 0.52, y: -0.02), labelKey: "diagram.click", onLeft: false, row: 1),
-        Callout(anchor: CGPoint(x: 0.20, y: -0.28), labelKey: "diagram.scroll", onLeft: false, row: 2),
+        Callout(anchor: CGPoint(x: -0.49, y: 0.15), labelKey: "diagram.cursor", onLeft: true, row: 0),
+        Callout(anchor: CGPoint(x: -0.25, y: -0.25), labelKey: "diagram.volume", onLeft: true, row: 2),
+        Callout(anchor: CGPoint(x: 0.35, y: 0.17), labelKey: "diagram.rightClick", onLeft: false, row: 0),
+        Callout(anchor: CGPoint(x: 0.48, y: -0.01), labelKey: "diagram.click", onLeft: false, row: 1),
+        Callout(anchor: CGPoint(x: 0.23, y: -0.25), labelKey: "diagram.scroll", onLeft: false, row: 2),
     ]
 
     private static func draw(_ artwork: NSImage, in ctx: CGContext, rect: NSRect) {
@@ -54,7 +53,7 @@ enum ControllerDiagram {
         let faint = NSColor.tertiaryLabelColor
 
         // il disegno sta al centro, le didascalie ai lati
-        let artWidth = rect.width * 0.46
+        let artWidth = rect.width * 0.58
         let artHeight = artWidth * (artwork.size.height / max(artwork.size.width, 1))
         let artRect = NSRect(x: rect.midX - artWidth / 2, y: rect.midY - artHeight / 2,
                              width: artWidth, height: artHeight)
