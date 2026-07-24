@@ -4,13 +4,9 @@
 # dopo aver messo il tuo nome utente. Un bottone con l'indirizzo sbagliato
 # manderebbe i soldi a qualcun altro, quindi meglio nessun bottone.
 
-# --- Ko-fi (consigliato) -------------------------------------------------
-# Come Buy Me a Coffee ma senza commissione sulla piattaforma per le
-# donazioni singole (restano solo le spese dell'incasso). Mostra il nome
-# utente che scegli, non la tua identità. Registrati su ko-fi.com e scrivi
-# qui sotto solo il nome utente.
-#
-# ko_fi: NOMEUTENTE
+# --- Ko-fi (attivo) ------------------------------------------------------
+# https://ko-fi.com/hirpino59
+ko_fi: hirpino59
 
 # --- Buy Me a Coffee -----------------------------------------------------
 # Equivalente, più conosciuto, ma trattiene il 5%.

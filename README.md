@@ -141,7 +141,7 @@ Use **"Report an issue or idea…"** in the app menu — it opens a pre-filled i
 
 ## Support
 
-CouchPilot is free and always will be. If it saved you a trip across the room, you can [buy me a coffee](../../) — entirely optional, and it changes nothing about the app.
+CouchPilot is free and always will be. If it saved you a trip across the room, you can [buy me a coffee](https://ko-fi.com/hirpino59) — entirely optional, and it changes nothing about the app.
 
 ---
 
