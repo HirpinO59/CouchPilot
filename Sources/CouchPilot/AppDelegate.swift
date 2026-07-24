@@ -92,7 +92,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         if !trusted { startTrustPolling() }
         refreshUI()
-        WelcomeWindow.showIfFirstRun()
+        WelcomeWindow.showIfFirstRun(controller: controllerName)
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -542,7 +542,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func openWelcome() {
-        WelcomeWindow.show()
+        WelcomeWindow.show(controller: controllerName)
     }
 
     @objc private func openIssues() {

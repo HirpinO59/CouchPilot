@@ -18,6 +18,7 @@ final class WelcomeWindow: NSWindowController {
               showsDiagram: true),
     ]
     private var index = 0
+    private static var controllerName: String?
 
     private let titleLabel = NSTextField(labelWithString: "")
     private let bodyLabel = NSTextField(wrappingLabelWithString: "")
@@ -28,7 +29,8 @@ final class WelcomeWindow: NSWindowController {
 
     private static var shared: WelcomeWindow?
 
-    static func show() {
+    static func show(controller: String? = nil) {
+        if controller != nil { controllerName = controller }
         if shared == nil { shared = WelcomeWindow() }
         shared?.index = 0
         shared?.render()
@@ -39,7 +41,8 @@ final class WelcomeWindow: NSWindowController {
     }
 
     // Mostrata una sola volta; il menu resta la via per rivederla.
-    static func showIfFirstRun() {
+    static func showIfFirstRun(controller: String? = nil) {
+        if controller != nil { controllerName = controller }
         let key = "hasSeenWelcome"
         guard !UserDefaults.standard.bool(forKey: key) else { return }
         UserDefaults.standard.set(true, forKey: key)
@@ -138,7 +141,7 @@ final class WelcomeWindow: NSWindowController {
         // Il file nel bundle ha la precedenza (le GIF dimostrative); in sua
         // assenza la terza scheda disegna lo schema del controller.
         let image = NSImage.bundled(named: slide.media)
-            ?? (slide.showsDiagram ? ControllerDiagram.image() : nil)
+            ?? (slide.showsDiagram ? ControllerDiagram.image(controller: Self.controllerName) : nil)
         imageView.image = image
         imageView.isHidden = image == nil
         imageView.animates = true

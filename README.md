@@ -36,7 +36,7 @@ Written in Swift with **zero external dependencies** and **zero data collection*
 - **Controller battery indicator** in the menu, macOS style
 - **Auto-pause in games**: when a game or a chosen app (GeForce Now and Steam are preloaded) is frontmost, CouchPilot steps aside and the controller belongs to the game
 - **Localized**: English, Italian, Spanish, Simplified Chinese — follows the system language by default
-- **Quick guide** on first launch: three cards explaining the controls, recallable any time from the menu
+- **Quick guide** on first launch: three cards explaining the controls, with a diagram that matches the controller you actually have (Xbox or DualSense). Recallable any time from the menu
 - Global on/off: press **View + Menu** together to stop instantly, hold them 2 seconds to resume
 
 ## Controls
