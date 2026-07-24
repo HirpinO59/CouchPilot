@@ -4,18 +4,25 @@
 # dopo aver messo il tuo nome utente. Un bottone con l'indirizzo sbagliato
 # manderebbe i soldi a qualcun altro, quindi meglio nessun bottone.
 
-# --- Buy Me a Coffee (consigliato) ---------------------------------------
-# GitHub lo riconosce nativamente: bottone curato e nome utente al posto
-# dell'identità vera. Registrati su buymeacoffee.com, scegli il nome utente
-# e scrivilo qui sotto (solo il nome, senza l'indirizzo completo).
-# Trattiene una commissione del 5%.
+# --- Ko-fi (consigliato) -------------------------------------------------
+# Come Buy Me a Coffee ma senza commissione sulla piattaforma per le
+# donazioni singole (restano solo le spese dell'incasso). Mostra il nome
+# utente che scegli, non la tua identità. Registrati su ko-fi.com e scrivi
+# qui sotto solo il nome utente.
+#
+# ko_fi: NOMEUTENTE
+
+# --- Buy Me a Coffee -----------------------------------------------------
+# Equivalente, più conosciuto, ma trattiene il 5%.
 #
 # buy_me_a_coffee: NOMEUTENTE
 
 # --- PayPal --------------------------------------------------------------
 # GitHub non ha una voce dedicata: va sotto "custom". Il link si crea su
-# paypal.com/paypalme. Attenzione: la pagina PayPal mostra il nome del
-# titolare del conto, quindi rivela la tua identità vera.
+# paypal.com/paypalme.
+# ⚠️ NON è anonimo: la pagina mostra il nome del titolare del conto (o della
+# ditta, se è un conto business). Scegliere questa strada solo rinunciando
+# allo pseudonimo.
 #
 # custom: ["https://paypal.me/NOMESCELTO"]
 
