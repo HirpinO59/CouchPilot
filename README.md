@@ -37,7 +37,7 @@ Written in Swift with **zero external dependencies** and **zero data collection*
 - **Auto-pause in games**: when a game or a chosen app (GeForce Now and Steam are preloaded) is frontmost, CouchPilot steps aside and the controller belongs to the game
 - **Localized**: English, Italian, Spanish, Simplified Chinese — follows the system language by default
 - **Quick guide** on first launch: three cards explaining the controls, recallable any time from the menu
-- Global on/off toggle: press the two mirrored buttons, **View + Menu**, together
+- Global on/off: press **View + Menu** together to stop instantly, hold them 2 seconds to resume
 
 ## Controls
 
@@ -56,14 +56,14 @@ Written in Swift with **zero external dependencies** and **zero data collection*
 | R2 (hold) | Precision: ¼ speed |
 | L2 (hold) | Turbo: ×2 speed |
 | L3 / R3 | Configurable — defaults: Mute / Middle click |
-| View (⧉) + Menu (☰) together | Toggle CouchPilot on/off |
+| View (⧉) + Menu (☰) together | Off instantly · hold 2 s to switch back on |
 
 The app activates when a controller connects and deactivates when it disconnects (releasing any held button, so a drag never gets stuck).
 
 ## Requirements
 
 - macOS 14 or later
-- A game controller paired over Bluetooth. Built and tested with Xbox Wireless Controllers; anything exposing the extended gamepad profile (DualSense, DualShock 4, Switch Pro) should work.
+- A game controller macOS recognises as an extended gamepad: Xbox Wireless, DualSense, DualShock 4, Switch Pro and MFi pads. Button names differ across brands but the layout maps to the same positions (A = Cross, View = Create/Share, Menu = Options/Start). Developed and tested on an Xbox Wireless Controller.
 
 ## Install
 

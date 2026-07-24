@@ -22,6 +22,7 @@ final class WelcomeWindow: NSWindowController {
     private let imageView = NSImageView()
     private let nextButton = NSButton()
     private let dots = NSStackView()
+    private var contentStack: NSStackView?
 
     private static var shared: WelcomeWindow?
 
@@ -72,9 +73,11 @@ final class WelcomeWindow: NSWindowController {
         titleLabel.alignment = .center
         titleLabel.lineBreakMode = .byWordWrapping
 
+        // testo lungo: a bandiera si legge, centrato no
         bodyLabel.font = .systemFont(ofSize: 13)
-        bodyLabel.alignment = .center
+        bodyLabel.alignment = .natural
         bodyLabel.textColor = .secondaryLabelColor
+        bodyLabel.setContentCompressionResistancePriority(.required, for: .vertical)
 
         dots.orientation = .horizontal
         dots.spacing = 7
@@ -106,12 +109,14 @@ final class WelcomeWindow: NSWindowController {
             stack.leadingAnchor.constraint(equalTo: content.leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: content.trailingAnchor),
             stack.topAnchor.constraint(equalTo: content.topAnchor, constant: 24),
+            stack.bottomAnchor.constraint(equalTo: content.bottomAnchor),
             imageView.widthAnchor.constraint(equalToConstant: 440),
-            imageView.heightAnchor.constraint(equalToConstant: 200),
+            imageView.heightAnchor.constraint(equalToConstant: 190),
             bodyLabel.widthAnchor.constraint(equalToConstant: 440),
             titleLabel.widthAnchor.constraint(equalToConstant: 440),
         ])
         stack.setCustomSpacing(24, after: bodyLabel)
+        contentStack = stack
     }
 
     @objc private func advance() {
@@ -143,6 +148,13 @@ final class WelcomeWindow: NSWindowController {
 
         nextButton.title = index == slides.count - 1 ? L.t("welcome.done") : L.t("welcome.next")
         window?.title = "CouchPilot"
+
+        // la finestra si adatta alla scheda: i testi cambiano lunghezza tra le
+        // schede e tra le lingue, un'altezza fissa taglierebbe qualcosa
+        contentStack?.layoutSubtreeIfNeeded()
+        if let fitting = contentStack?.fittingSize {
+            window?.setContentSize(NSSize(width: 520, height: fitting.height + 24))
+        }
     }
 }
 

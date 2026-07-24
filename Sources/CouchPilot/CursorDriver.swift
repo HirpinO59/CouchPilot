@@ -70,9 +70,12 @@ final class CursorDriver {
     private var prevView = false
     private var prevL3 = false
     private var prevR3 = false
-    // View + Menu insieme = accendi/spegni. Una sola volta per pressione,
-    // finché non si rilasciano entrambi.
+    // View + Menu insieme. Spegnere è immediato (serve al volo, quando il pad
+    // deve tornare a un'altra app); riaccendere richiede due secondi, così non
+    // succede per sbaglio mentre il pad è in mano per altro.
     private var togglePairFired = false
+    private var comboHeldSince = 0.0
+    private static let comboHoldToEnable = 2.0
 
     // Stato di una direzione del D-pad: quando è stata premuta e l'ultima
     // ripetizione, per le azioni che si ripetono tenendo premuto.
@@ -95,6 +98,7 @@ final class CursorDriver {
             self.lastTick = 0
             self.wasMoving = false
             self.togglePairFired = false
+            self.comboHeldSince = 0
             self.tunables = Tunables.load()
             self.syncPositionFromSystem()
             guard self.timer == nil else { return }
@@ -130,6 +134,7 @@ final class CursorDriver {
                 self.wasMoving = false
                 // una pressione iniziata prima della pausa non deve valere al rientro
                 self.togglePairFired = false
+                self.comboHeldSince = 0
                 self.prevView = false
             }
         }
@@ -165,11 +170,19 @@ final class CursorDriver {
         let view = pad.buttonOptions?.isPressed ?? false
         if menu && view {
             if !togglePairFired {
-                togglePairFired = true
-                applyEnabled(!enabled)
+                if enabled {
+                    togglePairFired = true
+                    applyEnabled(false)
+                } else if comboHeldSince == 0 {
+                    comboHeldSince = now
+                } else if now - comboHeldSince >= Self.comboHoldToEnable {
+                    togglePairFired = true
+                    applyEnabled(true)
+                }
             }
         } else if !menu && !view {
             togglePairFired = false
+            comboHeldSince = 0
         }
 
         if calibrating {
