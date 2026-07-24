@@ -1,0 +1,11 @@
+# Documenti di lavoro interni: restano sul Mac, fuori dal repository pubblico
+brief.md
+Log/
+note-private/
+
+# Prodotti della compilazione
+.build/
+build/
+
+# macOS
+.DS_Store
