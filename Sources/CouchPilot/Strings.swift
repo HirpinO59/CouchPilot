@@ -130,6 +130,13 @@ enum L {
         "menu.welcome": ["it": "Guida rapida", "en": "Quick guide",
                          "es": "Guía rápida", "zh": "快速指南"],
 
+        "diagram.cursor": ["it": "Cursore", "en": "Cursor", "es": "Cursor", "zh": "光标"],
+        "diagram.scroll": ["it": "Scorri", "en": "Scroll", "es": "Desplazar", "zh": "滚动"],
+        "diagram.click": ["it": "Click", "en": "Click", "es": "Clic", "zh": "点击"],
+        "diagram.rightClick": ["it": "Tasto destro", "en": "Right click", "es": "Clic derecho", "zh": "右键"],
+        "diagram.volume": ["it": "Volume", "en": "Volume", "es": "Volumen", "zh": "音量"],
+        "diagram.onoff": ["it": "Accendi / Spegni", "en": "On / Off", "es": "Encender / Apagar", "zh": "开 / 关"],
+
         "welcome.next": ["it": "Avanti", "en": "Next", "es": "Siguiente", "zh": "下一步"],
         "welcome.done": ["it": "Iniziamo", "en": "Get started", "es": "Empezar", "zh": "开始使用"],
         "welcome.1.title": ["it": "Benvenuto in CouchPilot",

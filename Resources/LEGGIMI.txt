@@ -1,12 +1,20 @@
-Metti qui i media della guida rapida, con questi nomi esatti:
+File attesi in questa cartella (tutti facoltativi: se mancano, la guida
+mostra solo il testo e non si rompe nulla).
 
-  welcome1.gif   (o .png) — movimento e click
-  welcome2.gif   (o .png) — media, volume, Mission Control
-  welcome3.png            — il menu nella barra, screenshot
+SCHEMA DEL CONTROLLER — terza scheda
+  controller.png   sagoma a filo di linea, sfondo TRASPARENTE
+                   consigliato ~900 px di larghezza, grigio medio così si
+                   vede bene sia in tema chiaro sia in tema scuro.
+                   Va bene anche controller.pdf (vettoriale, meglio).
+  L'app ci disegna sopra le linee di richiamo e le etichette tradotte.
+  Gli agganci sono in ControllerDiagram.swift, in frazioni del riquadro
+  (-1..1 da sinistra a destra, -1..1 dal basso in alto): dopo aver messo
+  l'immagine vanno ritarati una volta sola.
+  ⚠️ Serve un'immagine con licenza libera (CC0) o disegnata da noi: le
+  schermate prese da siti o da altri programmi non si possono pubblicare.
 
-Misura consigliata: 880x400 px (il doppio dei 440x200 della finestra, per
-gli schermi Retina). Se un file manca, la scheda mostra solo il testo:
-niente si rompe.
-
-Per convertire una clip in GIF:
-  swift note-private/videotogif.swift clip.mov --fps 12 --width 880
+GIF DIMOSTRATIVE — prime due schede
+  welcome1.gif  movimento e click
+  welcome2.gif  media, volume, on/off
+  Misura consigliata 880x400 px. Per convertirle:
+    swift note-private/videotogif.swift clip.mov --fps 12 --width 880

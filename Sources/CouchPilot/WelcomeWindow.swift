@@ -7,13 +7,15 @@ final class WelcomeWindow: NSWindowController {
     private struct Slide {
         let titleKey: String
         let bodyKey: String
-        let media: String // file in Resources, senza estensione; vuoto = nessuna immagine
+        let media: String // file in Resources, senza estensione
+        var showsDiagram = false
     }
 
     private let slides = [
         Slide(titleKey: "welcome.1.title", bodyKey: "welcome.1.body", media: "welcome1"),
         Slide(titleKey: "welcome.2.title", bodyKey: "welcome.2.body", media: "welcome2"),
-        Slide(titleKey: "welcome.3.title", bodyKey: "welcome.3.body", media: "welcome3"),
+        Slide(titleKey: "welcome.3.title", bodyKey: "welcome.3.body", media: "welcome3",
+              showsDiagram: true),
     ]
     private var index = 0
 
@@ -133,9 +135,10 @@ final class WelcomeWindow: NSWindowController {
         titleLabel.stringValue = L.t(slide.titleKey)
         bodyLabel.stringValue = L.t(slide.bodyKey)
 
-        // l'immagine compare solo se il file è presente nel bundle: così la
-        // finestra funziona anche prima che le GIF vengano aggiunte
+        // Il file nel bundle ha la precedenza (le GIF dimostrative); in sua
+        // assenza la terza scheda disegna lo schema del controller.
         let image = NSImage.bundled(named: slide.media)
+            ?? (slide.showsDiagram ? ControllerDiagram.image() : nil)
         imageView.image = image
         imageView.isHidden = image == nil
         imageView.animates = true
