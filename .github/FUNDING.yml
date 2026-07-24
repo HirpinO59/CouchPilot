@@ -1,0 +1,13 @@
+# Fa comparire il bottone "Sponsor" in cima al repository.
+#
+# GitHub non ha una voce dedicata a PayPal: va sotto "custom", che accetta
+# fino a 4 indirizzi.
+#
+# ⚠️ SOSTITUISCI l'indirizzo qui sotto con il TUO link PayPal.me, poi togli
+# il cancelletto per attivarlo. Il link si ottiene da paypal.com/paypalme:
+# ha la forma https://paypal.me/NOMESCELTO
+#
+# Finché la riga resta commentata, il bottone non compare — meglio nessun
+# bottone che un bottone che manda i soldi a qualcun altro.
+
+# custom: ["https://paypal.me/METTI-IL-TUO-NOME"]

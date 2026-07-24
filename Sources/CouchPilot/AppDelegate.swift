@@ -30,8 +30,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var loginItem: NSMenuItem!
     private var axItem: NSMenuItem!
     private let exclusionsMenu = NSMenu()
-    private let l3Menu = NSMenu()
-    private let r3Menu = NSMenu()
+    // sottomenu di scelta azione, uno per pulsante configurabile
+    private var buttonMenus: [(menu: NSMenu, key: String)] = []
     private let languageMenu = NSMenu()
     private var rootMenu: NSMenu?
     private var presetSubmenus: [(menu: NSMenu, key: String)] = []
@@ -159,8 +159,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             }
             return
         }
-        if menu === l3Menu || menu === r3Menu {
-            let selected = UserDefaults.standard.string(forKey: menu === l3Menu ? "actionL3" : "actionR3")
+        if let entry = buttonMenus.first(where: { $0.menu === menu }) {
+            let selected = UserDefaults.standard.string(forKey: entry.key)
             for item in menu.items {
                 item.state = (item.representedObject as? String) == selected ? .on : .off
             }
@@ -225,8 +225,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func selectPadAction(_ sender: NSMenuItem) {
-        guard let raw = sender.representedObject as? String else { return }
-        UserDefaults.standard.set(raw, forKey: sender.menu === l3Menu ? "actionL3" : "actionR3")
+        guard let raw = sender.representedObject as? String,
+              let key = buttonMenus.first(where: { $0.menu === sender.menu })?.key else { return }
+        UserDefaults.standard.set(raw, forKey: key)
     }
 
     @objc private func selectPreset(_ sender: NSMenuItem) {
@@ -361,8 +362,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
 
         settingsMenu.addItem(.separator())
-        for (titleKey, submenu) in [("menu.buttonL3", l3Menu), ("menu.buttonR3", r3Menu)] {
-            submenu.removeAllItems()
+
+        buttonMenus.removeAll()
+        let buttonsMenu = NSMenu()
+        buttonsMenu.autoenablesItems = false
+        let buttons: [(String, String)] = [
+            ("menu.buttonL3", "actionL3"), ("menu.buttonR3", "actionR3"),
+            ("menu.dpadUp", "actionDpadUp"), ("menu.dpadDown", "actionDpadDown"),
+            ("menu.dpadLeft", "actionDpadLeft"), ("menu.dpadRight", "actionDpadRight"),
+        ]
+        for (titleKey, key) in buttons {
+            let submenu = NSMenu()
             submenu.autoenablesItems = false
             submenu.delegate = self
             for action in PadAction.allCases {
@@ -371,10 +381,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 item.representedObject = action.rawValue
                 submenu.addItem(item)
             }
+            buttonMenus.append((submenu, key))
             let holder = NSMenuItem(title: L.t(titleKey), action: nil, keyEquivalent: "")
             holder.submenu = submenu
-            settingsMenu.addItem(holder)
+            buttonsMenu.addItem(holder)
+            if key == "actionR3" { buttonsMenu.addItem(.separator()) }
         }
+        let buttonsItem = NSMenuItem(title: L.t("menu.buttons"), action: nil, keyEquivalent: "")
+        buttonsItem.submenu = buttonsMenu
+        settingsMenu.addItem(buttonsItem)
 
         settingsMenu.addItem(.separator())
 

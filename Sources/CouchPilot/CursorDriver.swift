@@ -68,15 +68,21 @@ final class CursorDriver {
     private var prevLB = false
     private var prevRB = false
     private var prevView = false
-    private var prevDpadLeft = false
-    private var prevDpadRight = false
     private var prevL3 = false
     private var prevR3 = false
     private var menuHeldSince = 0.0
     private var menuFired = false
-    private var dpadUpHeldSince = 0.0
-    private var dpadDownHeldSince = 0.0
-    private var lastVolumeRepeat = 0.0
+
+    // Stato di una direzione del D-pad: quando è stata premuta e l'ultima
+    // ripetizione, per le azioni che si ripetono tenendo premuto.
+    private struct HeldDirection {
+        var since = 0.0
+        var lastRepeat = 0.0
+    }
+    private var dpadUp = HeldDirection()
+    private var dpadDown = HeldDirection()
+    private var dpadLeft = HeldDirection()
+    private var dpadRight = HeldDirection()
 
     // callback sul main thread
     var onEnabledChanged: ((Bool) -> Void)?
@@ -278,15 +284,12 @@ final class CursorDriver {
         if view && !prevView { poster.systemShortcut(.showDesktop) }
         prevView = view
 
-        // D-pad: su/giù = volume (ripete da tenuto), sx/dx = traccia prec/succ
-        volumeHold(pressed: pad.dpad.up.isPressed, key: .soundUp, heldSince: &dpadUpHeldSince, now: now)
-        volumeHold(pressed: pad.dpad.down.isPressed, key: .soundDown, heldSince: &dpadDownHeldSince, now: now)
-        let dl = pad.dpad.left.isPressed
-        if dl && !prevDpadLeft { poster.mediaKey(.previous) }
-        prevDpadLeft = dl
-        let dr = pad.dpad.right.isPressed
-        if dr && !prevDpadRight { poster.mediaKey(.next) }
-        prevDpadRight = dr
+        // D-pad: quattro direzioni configurabili. Impostandole su "nessuna
+        // azione" restano libere per la navigazione che macOS fa da sé col pad.
+        direction(pad.dpad.up.isPressed, s.actionDpadUp, &dpadUp, now)
+        direction(pad.dpad.down.isPressed, s.actionDpadDown, &dpadDown, now)
+        direction(pad.dpad.left.isPressed, s.actionDpadLeft, &dpadLeft, now)
+        direction(pad.dpad.right.isPressed, s.actionDpadRight, &dpadRight, now)
 
         // L3 / R3 = azione configurabile dal menu
         let l3 = pad.leftThumbstickButton?.isPressed ?? false
@@ -305,6 +308,8 @@ final class CursorDriver {
         case .playPause: poster.mediaKey(.play)
         case .volumeUp: poster.mediaKey(.soundUp)
         case .volumeDown: poster.mediaKey(.soundDown)
+        case .previousTrack: poster.mediaKey(.previous)
+        case .nextTrack: poster.mediaKey(.next)
         case .brightnessUp: poster.mediaKey(.brightnessUp)
         case .brightnessDown: poster.mediaKey(.brightnessDown)
         case .missionControl: poster.systemShortcut(.missionControl)
@@ -313,17 +318,19 @@ final class CursorDriver {
         }
     }
 
-    private func volumeHold(pressed: Bool, key: MediaKey, heldSince: inout Double, now: Double) {
-        if pressed {
-            if heldSince == 0 {
-                heldSince = now
-                poster.mediaKey(key)
-            } else if now - heldSince > 0.4, now - lastVolumeRepeat > 0.12 {
-                lastVolumeRepeat = now
-                poster.mediaKey(key)
-            }
-        } else {
-            heldSince = 0
+    private func direction(_ pressed: Bool, _ raw: String, _ state: inout HeldDirection, _ now: Double) {
+        guard pressed else {
+            state = HeldDirection()
+            return
+        }
+        let action = PadAction(rawValue: raw) ?? .none
+        if state.since == 0 {
+            state.since = now
+            state.lastRepeat = now
+            perform(action)
+        } else if action.repeatsWhenHeld, now - state.since > 0.4, now - state.lastRepeat > 0.12 {
+            state.lastRepeat = now
+            perform(action)
         }
     }
 

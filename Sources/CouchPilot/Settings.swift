@@ -14,6 +14,10 @@ enum Settings {
             "boostFactor": 2.0,
             "actionL3": "mute",
             "actionR3": "middleClick",
+            "actionDpadUp": "volumeUp",
+            "actionDpadDown": "volumeDown",
+            "actionDpadLeft": "previousTrack",
+            "actionDpadRight": "nextTrack",
             "language": "auto",
             "menuHoldSeconds": 2.0,
             "debugLog": false,
@@ -36,6 +40,10 @@ struct Tunables {
     let boostFactor: Double
     let actionL3: String
     let actionR3: String
+    let actionDpadUp: String
+    let actionDpadDown: String
+    let actionDpadLeft: String
+    let actionDpadRight: String
     let debugLog: Bool
     let offsetRX: Double
     let offsetRY: Double
@@ -59,6 +67,10 @@ struct Tunables {
             boostFactor: d.double(forKey: "boostFactor"),
             actionL3: d.string(forKey: "actionL3") ?? "none",
             actionR3: d.string(forKey: "actionR3") ?? "none",
+            actionDpadUp: d.string(forKey: "actionDpadUp") ?? "none",
+            actionDpadDown: d.string(forKey: "actionDpadDown") ?? "none",
+            actionDpadLeft: d.string(forKey: "actionDpadLeft") ?? "none",
+            actionDpadRight: d.string(forKey: "actionDpadRight") ?? "none",
             debugLog: d.bool(forKey: "debugLog"),
             offsetRX: d.double(forKey: "offsetRX"),
             offsetRY: d.double(forKey: "offsetRY"),

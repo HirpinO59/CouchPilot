@@ -27,8 +27,8 @@ Lo script compila con SPM, assembla `build/CouchPilot.app` e firma con l'identit
 | Menu (☰) **tenuto premuto** | Toggle on/off globale (2 s, per evitare i tocchi involontari) |
 | B | Mission Control |
 | Y | Play/Pausa |
-| D-pad su/giù | Volume + / − (tieni premuto per ripetere) |
-| D-pad sx/dx | Traccia precedente / successiva |
+| D-pad su/giù | Volume + / − (tieni premuto per ripetere) — configurabile |
+| D-pad sx/dx | Traccia precedente / successiva — configurabile |
 | LB / RB | Space precedente / successivo |
 | View (⧉) | Mostra Scrivania |
 | R2 (tenuto) | Precisione: cursore e scroll a ¼ della velocità |
@@ -110,6 +110,7 @@ defaults write com.hirpino.couchpilot maxSpeed -float 1400
 
 ## Note
 
+- **macOS naviga da solo col D-pad:** con un controller collegato, il sistema usa la croce direzionale per muoversi in Spotlight, Launchpad e simili, e non è disattivabile dalle Impostazioni. Se un'azione della croce scatta *mentre* macOS sposta anche la selezione, metti quella direzione su **Nessuna azione** in Impostazioni → Pulsanti.
 - **Conflitti col pad:** i giochi (GeForce Now, Steam…) ricevono l'input del controller insieme a noi. La soluzione è l'auto-pausa per app in primo piano ("Disattiva nelle app"). Altre app di mapping (Controlly, Enjoyable…) non vanno tenute attive in contemporanea: eventi doppi.
 - La build va fatta sempre da questa cartella (stesso path + stessa firma = permesso Accessibilità stabile).
 - In roadmap: profili per applicazione, scorciatoie personalizzate sui pulsanti, D-pad come frecce.

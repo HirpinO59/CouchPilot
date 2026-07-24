@@ -48,8 +48,8 @@ Written in Swift with **zero external dependencies** and **zero data collection*
 | Right stick | Scroll vertically/horizontally |
 | B | Mission Control |
 | Y | Play/Pause |
-| D-pad up/down | Volume up/down (hold to repeat) |
-| D-pad left/right | Previous / next track |
+| D-pad up/down | Volume up/down (hold to repeat) — configurable |
+| D-pad left/right | Previous / next track — configurable |
 | LB / RB | Previous / next Space |
 | View (⧉) | Show Desktop |
 | R2 (hold) | Precision: ¼ speed |
@@ -112,6 +112,7 @@ defaults write com.hirpino.couchpilot maxSpeed -float 1800
 | `precisionFactor` | 0.25 | Speed multiplier while R2 is held |
 | `boostFactor` | 2.0 | Speed multiplier while L2 is held |
 | `actionL3` / `actionR3` | mute / middleClick | Stick-button actions |
+| `actionDpadUp` … `actionDpadRight` | volume / track | D-pad actions, `none` to leave the direction free |
 | `excludedApps` | GeForce Now, Steam | Bundle ids that auto-pause CouchPilot |
 | `autoPauseGames` | true | Auto-pause when the frontmost app declares itself a game |
 | `language` | auto | Menu language: `auto`, `it`, `en`, `es`, `zh` |
@@ -128,6 +129,7 @@ CouchPilot collects nothing. There is **no network code** in the app — no serv
 - Brightness actions may have no effect on external displays (macOS limitation).
 - Don't run other controller-mapping apps (Controlly, Enjoyable…) at the same time: both would emit events and inputs double up.
 - Xbox controllers auto-sleep after ~15 minutes of inactivity — that's the controller, not the app.
+- macOS itself lets a connected controller navigate some system interfaces (Spotlight, Launchpad) with the D-pad, and that cannot be turned off in System Settings. If a D-pad action of yours fires *while* macOS is also moving the selection, set that direction to **No action** in Settings → Buttons.
 
 ## Roadmap
 
