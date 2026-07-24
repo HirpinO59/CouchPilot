@@ -70,8 +70,9 @@ final class CursorDriver {
     private var prevView = false
     private var prevL3 = false
     private var prevR3 = false
-    private var menuHeldSince = 0.0
-    private var menuFired = false
+    // View + Menu insieme = accendi/spegni. Una sola volta per pressione,
+    // finché non si rilasciano entrambi.
+    private var togglePairFired = false
 
     // Stato di una direzione del D-pad: quando è stata premuta e l'ultima
     // ripetizione, per le azioni che si ripetono tenendo premuto.
@@ -93,8 +94,7 @@ final class CursorDriver {
             self.gamepad = gamepad
             self.lastTick = 0
             self.wasMoving = false
-            self.menuHeldSince = 0
-            self.menuFired = false
+            self.togglePairFired = false
             self.tunables = Tunables.load()
             self.syncPositionFromSystem()
             guard self.timer == nil else { return }
@@ -128,9 +128,9 @@ final class CursorDriver {
             if on {
                 self.releaseButtons()
                 self.wasMoving = false
-                // una pressione di ☰ iniziata prima della pausa non deve valere al rientro
-                self.menuHeldSince = 0
-                self.menuFired = false
+                // una pressione iniziata prima della pausa non deve valere al rientro
+                self.togglePairFired = false
+                self.prevView = false
             }
         }
     }
@@ -159,19 +159,17 @@ final class CursorDriver {
         // in pausa niente input, nemmeno ☰: nei giochi quel tasto ha altri usi
         guard !suspended else { return }
 
-        // ☰ = toggle globale: va letto anche quando l'app è disattivata
+        // View + Menu insieme = toggle globale. I due tasti a specchio non si
+        // premono per sbaglio, e va letto anche quando l'app è disattivata.
         let menu = pad.buttonMenu.isPressed
-        // pressione prolungata, non singolo click: evita di spegnere l'app per sbaglio
-        if menu {
-            if menuHeldSince == 0 {
-                menuHeldSince = now
-            } else if !menuFired, now - menuHeldSince >= Tunables.menuHoldSeconds() {
-                menuFired = true
+        let view = pad.buttonOptions?.isPressed ?? false
+        if menu && view {
+            if !togglePairFired {
+                togglePairFired = true
                 applyEnabled(!enabled)
             }
-        } else {
-            menuHeldSince = 0
-            menuFired = false
+        } else if !menu && !view {
+            togglePairFired = false
         }
 
         if calibrating {
@@ -279,9 +277,11 @@ final class CursorDriver {
         if rb && !prevRB { poster.systemShortcut(.spaceRight) }
         prevRB = rb
 
-        // View (⧉) = Mostra Scrivania
+        // View (⧉) = Mostra Scrivania, al rilascio: se nel frattempo è stato
+        // premuto anche Menu, la combinazione ha già fatto il toggle e questa
+        // azione va saltata.
         let view = pad.buttonOptions?.isPressed ?? false
-        if view && !prevView { poster.systemShortcut(.showDesktop) }
+        if prevView && !view && !togglePairFired { poster.systemShortcut(.showDesktop) }
         prevView = view
 
         // D-pad: quattro direzioni configurabili. Impostandole su "nessuna

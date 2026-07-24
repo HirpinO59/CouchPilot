@@ -1,0 +1,12 @@
+Metti qui i media della guida rapida, con questi nomi esatti:
+
+  welcome1.gif   (o .png) — movimento e click
+  welcome2.gif   (o .png) — media, volume, Mission Control
+  welcome3.png            — il menu nella barra, screenshot
+
+Misura consigliata: 880x400 px (il doppio dei 440x200 della finestra, per
+gli schermi Retina). Se un file manca, la scheda mostra solo il testo:
+niente si rompe.
+
+Per convertire una clip in GIF:
+  swift note-private/videotogif.swift clip.mov --fps 12 --width 880

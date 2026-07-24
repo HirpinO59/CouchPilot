@@ -36,7 +36,8 @@ Written in Swift with **zero external dependencies** and **zero data collection*
 - **Controller battery indicator** in the menu, macOS style
 - **Auto-pause in games**: when a game or a chosen app (GeForce Now and Steam are preloaded) is frontmost, CouchPilot steps aside and the controller belongs to the game
 - **Localized**: English, Italian, Spanish, Simplified Chinese — follows the system language by default
-- Global on/off toggle: hold the Menu (☰) button for 2 seconds
+- **Quick guide** on first launch: three cards explaining the controls, recallable any time from the menu
+- Global on/off toggle: press the two mirrored buttons, **View + Menu**, together
 
 ## Controls
 
@@ -55,7 +56,7 @@ Written in Swift with **zero external dependencies** and **zero data collection*
 | R2 (hold) | Precision: ¼ speed |
 | L2 (hold) | Turbo: ×2 speed |
 | L3 / R3 | Configurable — defaults: Mute / Middle click |
-| Menu (☰) held 2 s | Toggle CouchPilot on/off |
+| View (⧉) + Menu (☰) together | Toggle CouchPilot on/off |
 
 The app activates when a controller connects and deactivates when it disconnects (releasing any held button, so a drag never gets stuck).
 
@@ -116,7 +117,6 @@ defaults write com.hirpino.couchpilot maxSpeed -float 1800
 | `excludedApps` | GeForce Now, Steam | Bundle ids that auto-pause CouchPilot |
 | `autoPauseGames` | true | Auto-pause when the frontmost app declares itself a game |
 | `language` | auto | Menu language: `auto`, `it`, `en`, `es`, `zh` |
-| `menuHoldSeconds` | 2.0 | How long to hold ☰ for the toggle |
 | `debugLog` | false | Log stick values twice a second (Console.app) |
 
 ## Privacy

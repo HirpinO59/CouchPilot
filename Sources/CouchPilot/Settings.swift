@@ -19,7 +19,6 @@ enum Settings {
             "actionDpadLeft": "previousTrack",
             "actionDpadRight": "nextTrack",
             "language": "auto",
-            "menuHoldSeconds": 2.0,
             "debugLog": false,
             "autoPauseGames": true,
             "excludedApps": ["com.nvidia.gfnpc.mall", "com.valvesoftware.steam"],
@@ -49,11 +48,6 @@ struct Tunables {
     let offsetRY: Double
     let offsetLX: Double
     let offsetLY: Double
-
-    // Letta a parte: serve anche quando l'app è disattivata, prima del resto.
-    static func menuHoldSeconds() -> Double {
-        max(UserDefaults.standard.double(forKey: "menuHoldSeconds"), 0.15)
-    }
 
     static func load() -> Tunables {
         let d = UserDefaults.standard

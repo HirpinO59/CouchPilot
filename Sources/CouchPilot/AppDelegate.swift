@@ -92,6 +92,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         if !trusted { startTrustPolling() }
         refreshUI()
+        WelcomeWindow.showIfFirstRun()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -289,6 +290,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         axItem = NSMenuItem(title: L.t("menu.accessibility"), action: #selector(openAX), keyEquivalent: "")
         axItem.target = self
         menu.addItem(axItem)
+
+        let guideItem = NSMenuItem(title: L.t("menu.welcome"), action: #selector(openWelcome), keyEquivalent: "")
+        guideItem.target = self
+        menu.addItem(guideItem)
 
         if let feedbackItem = buildFeedbackItem() { menu.addItem(feedbackItem) }
 
@@ -534,6 +539,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             Log.write("errore login item: \(error.localizedDescription)")
         }
         refreshUI()
+    }
+
+    @objc private func openWelcome() {
+        WelcomeWindow.show()
     }
 
     @objc private func openIssues() {

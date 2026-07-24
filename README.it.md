@@ -24,7 +24,7 @@ Lo script compila con SPM, assembla `build/CouchPilot.app` e firma con l'identit
 | A | Click sinistro (tieni premuto = drag) |
 | X | Click destro |
 | Stick destro | Scroll verticale/orizzontale |
-| Menu (☰) **tenuto premuto** | Toggle on/off globale (2 s, per evitare i tocchi involontari) |
+| View (⧉) + Menu (☰) **insieme** | Toggle on/off globale (i due tasti a specchio: impossibili da premere per sbaglio) |
 | B | Mission Control |
 | Y | Play/Pausa |
 | D-pad su/giù | Volume + / − (tieni premuto per ripetere) — configurabile |
@@ -48,7 +48,8 @@ In cima al menu c'è il controller collegato con un **indicatore di batteria in 
 
 Da dove arriva il dato: `GCController.battery` è la via ufficiale e funziona su DualSense e simili, ma **sui pad Xbox via Bluetooth riporta livello 0 e stato sconosciuto** (verificato su macOS 26). Il livello reale sta nello stack Bluetooth e si legge con `system_profiler SPBluetoothDataType -json` (~0,2 s), eseguito fuori dal thread principale. L'app prova prima la via ufficiale e ripiega sulla seconda.
 
-- **Attivo** — toggle on/off (equivale a tenere premuto ☰)
+- **Attivo** — toggle on/off (equivale a premere View + Menu insieme)
+- **Guida rapida** — tre schede con i comandi, mostrate una sola volta al primo avvio e richiamabili da qui. I media stanno in `Resources/` (welcome1/2/3): se mancano, le schede mostrano solo il testo
 - **Calibra stick** — campiona 2 secondi a stick fermi e salva l'offset di riposo (per il drift)
 - **Impostazioni** — tutta la configurazione in un posto solo, effetto immediato:
   - parametri a preset: velocità cursore e scroll, deadzone, curva di risposta, fattori R2/L2 (le stesse chiavi restano regolabili a valori arbitrari via `defaults write`, tabella sotto);
@@ -83,7 +84,6 @@ defaults write com.hirpino.couchpilot maxSpeed -float 1400
 | `boostFactor` | 2.0 | Moltiplicatore velocità con L2 tenuto |
 | `actionL3` / `actionR3` | mute / middleClick | Azione dei pulsanti stick (gestibili dal menu) |
 | `language` | auto | Lingua del menu: `auto`, `it`, `en`, `es`, `zh` |
-| `menuHoldSeconds` | 2.0 | Quanto tenere premuto ☰ per il toggle (minimo 0,15) |
 
 ## Test manuali
 
@@ -95,7 +95,7 @@ defaults write com.hirpino.couchpilot maxSpeed -float 1400
 - [ ] Disconnessione del controller a metà drag: il pulsante si rilascia
 - [ ] Riavvio del Mac con login item attivo
 - [ ] Doppio click con due pressioni rapide di A
-- [ ] Toggle tenendo premuto ☰ (un tocco rapido non deve fare nulla) e dal menu
+- [ ] Toggle premendo View + Menu insieme; View da solo continua a mostrare la Scrivania
 
 **Fase 2:**
 - [ ] Y mette in play/pausa (Musica, YouTube, Spotify)

@@ -26,6 +26,8 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp .build/release/CouchPilot "$APP/Contents/MacOS/CouchPilot"
 cp Info.plist "$APP/Contents/Info.plist"
 cp "$ICNS" "$APP/Contents/Resources/AppIcon.icns"
+# media della guida rapida (welcome1/2/3.gif|png), se presenti
+[ -d Resources ] && cp -R Resources/. "$APP/Contents/Resources/" 2>/dev/null || true
 printf 'APPL????' > "$APP/Contents/PkgInfo"
 
 IDENTITY="${COUCHPILOT_SIGN_ID:-$(security find-identity -v -p codesigning 2>/dev/null \
