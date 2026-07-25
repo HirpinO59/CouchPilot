@@ -149,6 +149,8 @@ Per-app profiles (1.1)
 
 Use **"Report an issue or idea…"** in the app menu — it opens a pre-filled issue with the technical details already attached (visible and editable before you send) — or [open an issue](../../issues) directly.
 
+No GitHub account? The menu also has **"Send an email…"**, which opens a draft to `gamerfromif95@gmail.com` with the same details filled in. Nothing is sent until you press send.
+
 ## Support
 
 CouchPilot is free and always will be. If it saved you a trip across the room, you can [buy me a coffee](https://ko-fi.com/hirpino59) — entirely optional, and it changes nothing about the app.

@@ -10,11 +10,12 @@ enum Feedback {
     // Pagina delle offerte, aperta dal pulsante "Buy Me a Coffee" della guida.
     static let coffee = "https://ko-fi.com/hirpino59"
 
-    // Indirizzo per chi non ha un account GitHub.
-    // ⚠️ Usare un indirizzo dedicato all'app, MAI quello personale: una volta
-    // pubblicato finisce nelle liste di spam e non si torna indietro.
-    // Lasciare vuoto per non mostrare la voce.
-    static let supportEmail = ""
+    // Indirizzo per chi non ha un account GitHub: senza, quella fetta di utenti
+    // resta senza modo di scrivere.
+    // ⚠️ Finisce nel sorgente pubblico e dentro l'app, quindi i bot lo
+    // raccolgono: metti in conto lo spam. Se un giorno diventa ingestibile si
+    // cambia qui e basta — la voce di menu compare solo se questo campo è pieno.
+    static let supportEmail = "gamerfromif95@gmail.com"
 
     static var hasIssues: Bool { !repository.isEmpty }
     static var hasEmail: Bool { !supportEmail.isEmpty }
