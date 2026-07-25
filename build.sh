@@ -26,8 +26,12 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp .build/release/CouchPilot "$APP/Contents/MacOS/CouchPilot"
 cp Info.plist "$APP/Contents/Info.plist"
 cp "$ICNS" "$APP/Contents/Resources/AppIcon.icns"
-# media della guida rapida (welcome1/2/3.gif|png), se presenti
-[ -d Resources ] && cp -R Resources/. "$APP/Contents/Resources/" 2>/dev/null || true
+# media della guida rapida, se presenti; LEGGIMI.txt è una nota per noi e
+# non deve finire dentro l'app che spediamo
+if [ -d Resources ]; then
+  find Resources -type f ! -name 'LEGGIMI.txt' ! -name '.DS_Store' \
+    -exec cp {} "$APP/Contents/Resources/" \;
+fi
 printf 'APPL????' > "$APP/Contents/PkgInfo"
 
 IDENTITY="${COUCHPILOT_SIGN_ID:-$(security find-identity -v -p codesigning 2>/dev/null \

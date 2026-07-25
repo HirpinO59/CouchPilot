@@ -51,6 +51,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             self?.calibrating = false
             self?.refreshUI()
         }
+        // ☰ da solo apre il menu in barra: un click finto sull'icona, così si
+        // apre come se l'avessi cliccata col mouse — e col pad ci si naviga
+        // dentro, visto che cursore e click continuano a funzionare.
+        driver.onOpenMenu = { [weak self] in
+            self?.statusItem.button?.performClick(nil)
+        }
 
         monitor.onConnect = { [weak self] controller in
             guard let self, let pad = controller.extendedGamepad else { return }
@@ -470,6 +476,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             self.trustTimer = nil
             Log.write("permesso Accessibilità concesso")
             self.refreshUI()
+            NotificationCenter.default.post(name: PermissionsGate.granted, object: nil)
         }
     }
 
@@ -492,15 +499,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func toggleLogin() {
-        do {
-            if SMAppService.mainApp.status == .enabled {
-                try SMAppService.mainApp.unregister()
-            } else {
-                try SMAppService.mainApp.register()
-            }
-        } catch {
-            Log.write("errore login item: \(error.localizedDescription)")
-        }
+        LoginItem.toggle()
         refreshUI()
     }
 

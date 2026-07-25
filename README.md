@@ -6,7 +6,8 @@
 
 <p align="center">
   <b>Control your Mac from the couch with a game controller.</b><br>
-  Cursor, clicks, scrolling, media keys, Mission Control — from a menu bar app that weighs 1.5 MB.
+  Cursor, clicks, scrolling, media keys, Mission Control — from a menu bar app with no dependencies,
+  no network code and nothing to configure before it works.
 </p>
 
 <p align="center">
@@ -32,12 +33,12 @@ Written in Swift with **zero external dependencies** and **zero data collection*
 - **Media keys**: play/pause, volume with hold-to-repeat, previous/next track
 - **Mission Control, Spaces, Show Desktop** — invoked through *your* configured macOS shortcuts, so remappings are respected
 - **Precision mode** (hold R2, ¼ speed) and **turbo** (hold L2, ×2) for cursor and scrolling
-- **Every button is remappable** from a visual keybinds screen: click an action next to the drawing of *your* controller, pick a new one, save. 12 buttons, 17 actions
+- **Every button is remappable** from a visual keybinds screen, and the binding is *recorded, not picked from a list*: click the action next to the drawing of *your* controller, take one of the three suggestions for that button, or hit **Record input** and press any key, key combination or mouse button — it gets copied verbatim. 12 buttons, plus each stick's movement (cursor, scroll or nothing) set separately from the stick click
 - **Controller battery indicator** in the menu, macOS style
 - **Auto-pause in games**: when a game or a chosen app (GeForce Now and Steam are preloaded) is frontmost, CouchPilot steps aside and the controller belongs to the game
 - **Localized**: English, Italian, Spanish, Simplified Chinese — follows the system language by default
-- **Quick guide** on first launch: three cards explaining the controls, with a diagram that matches the controller you actually have (Xbox or DualSense). Recallable any time from the menu
-- Global on/off: press **View + Menu** together to stop instantly, hold them 2 seconds to resume
+- **Quick guide** on first launch: an intro card, the on/off command, and the keybinds screen — with the diagram and button names matching the controller you actually have (View + Menu on Xbox, Create + Options on DualSense). Recallable any time from the menu
+- Global on/off: hold **View + Menu** together for 2 seconds, both ways. Each of the two also has its own job when pressed alone — View is remappable, Menu opens the menu bar menu
 
 ## Controls
 
@@ -52,13 +53,14 @@ Written in Swift with **zero external dependencies** and **zero data collection*
 | D-pad up/down | Volume up/down (hold to repeat) — configurable |
 | D-pad left/right | Previous / next track — configurable |
 | LB / RB | Previous / next Space |
-| View (⧉) | Show Desktop |
 | R2 (hold) | Precision: ¼ speed |
 | L2 (hold) | Turbo: ×2 speed |
 | L3 / R3 | Configurable — defaults: Mute / Middle click |
 
 Every button in this table can be reassigned from **Keybinds** in the menu — except View + Menu, reserved for the on/off command.
-| View (⧉) + Menu (☰) together | Off instantly · hold 2 s to switch back on |
+| View (⧉) alone | Show Desktop — remappable. Fires on release, so it doesn't go off when View is part of the on/off combo |
+| Menu (☰) alone | Opens the CouchPilot menu bar menu — fixed, not remappable |
+| View (⧉) + Menu (☰) together, 2 s | Switches CouchPilot on and off, both ways |
 
 The app activates when a controller connects and deactivates when it disconnects (releasing any held button, so a drag never gets stuck).
 
@@ -123,7 +125,9 @@ defaults write com.hirpino.couchpilot maxSpeed -float 1800
 
 ## Privacy
 
-CouchPilot collects nothing. There is **no network code** in the app — no servers, no analytics, no telemetry. It does **not read your keyboard or mouse**: the Accessibility permission is used to *generate* input events, never to intercept them — the code contains no event tap and no global monitor. Preferences and a small technical log (`~/Library/Logs/CouchPilot.log`) stay on your Mac.
+CouchPilot collects nothing. There is **no network code** in the app — no servers, no analytics, no telemetry. Preferences and a small technical log (`~/Library/Logs/CouchPilot.log`) stay on your Mac.
+
+The Accessibility permission is used to *generate* mouse and keyboard events. CouchPilot reads input in exactly one place: while you are recording a binding in the Keybinds screen, it opens an event tap so it can capture the key, combination or click you press — including media keys, which macOS never delivers to apps as ordinary key events. That tap exists only during the recording: it closes when you finish, when the window loses focus or is closed, and in any case after 20 seconds. Nothing you press is stored except the one binding you chose, and nothing ever leaves your Mac. It lives in one file you can read end to end: [`InputCapture.swift`](Sources/CouchPilot/InputCapture.swift).
 
 ## Known limitations
 
@@ -131,11 +135,11 @@ CouchPilot collects nothing. There is **no network code** in the app — no serv
 - Brightness actions may have no effect on external displays (macOS limitation).
 - Don't run other controller-mapping apps (Controlly, Enjoyable…) at the same time: both would emit events and inputs double up.
 - Xbox controllers auto-sleep after ~15 minutes of inactivity — that's the controller, not the app.
-- macOS itself lets a connected controller navigate some system interfaces (Spotlight, Launchpad) with the D-pad, and that cannot be turned off in System Settings. If a D-pad action of yours fires *while* macOS is also moving the selection, set that direction to **No action** in Settings → Buttons.
+- macOS itself lets a connected controller navigate some system interfaces (Spotlight, Launchpad) with the D-pad, and that cannot be turned off in System Settings. If a D-pad action of yours fires *while* macOS is also moving the selection, set that direction to **No action** in Keybinds.
 
 ## Roadmap
 
-Per-app profiles · custom keyboard shortcuts on buttons · D-pad as arrow keys
+Per-app profiles (1.1)
 
 ## Feedback
 

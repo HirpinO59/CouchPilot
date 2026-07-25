@@ -12,16 +12,31 @@ enum MediaKey: Int32 {
     case play = 16
     case next = 17
     case previous = 18
+
+    var titleKey: String {
+        switch self {
+        case .soundUp: return "action.volumeUp"
+        case .soundDown: return "action.volumeDown"
+        case .brightnessUp: return "action.brightnessUp"
+        case .brightnessDown: return "action.brightnessDown"
+        case .mute: return "action.mute"
+        case .play: return "action.playPause"
+        case .next: return "action.nextTrack"
+        case .previous: return "action.previousTrack"
+        }
+    }
 }
 
 // Azioni di sistema con scorciatoia configurabile: la combinazione reale viene
 // letta da com.apple.symbolichotkeys a ogni uso (segue le impostazioni utente),
 // con fallback sul default macOS se la voce non esiste.
-enum SystemShortcut {
+enum SystemShortcut: String {
     case missionControl
     case showDesktop
     case spaceLeft
     case spaceRight
+
+    var titleKey: String { "action.\(rawValue)" }
 
     private var hotKeyID: Int {
         switch self {

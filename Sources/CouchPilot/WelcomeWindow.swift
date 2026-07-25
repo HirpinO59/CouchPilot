@@ -1,36 +1,47 @@
 import AppKit
 
-// Guida rapida in tre schede: le prime due spiegano, la terza è la
-// configurazione dei tasti, raggiungibile anche direttamente dal menu.
-// Senza questa finestra l'app, non avendo icona nel Dock né interfaccia,
-// sembrerebbe non essersi installata.
+// Guida rapida in tre schede. La prima presenta l'app e chiede feedback, la
+// seconda insegna il comando di accensione, la terza è l'assegnazione dei
+// tasti, raggiungibile anche direttamente dal menu. Senza questa finestra
+// l'app, non avendo icona nel Dock né interfaccia, sembrerebbe non essersi
+// installata. I colori sono tutti di sistema: la finestra segue da sé il tema
+// chiaro o scuro di macOS.
 final class WelcomeWindow: NSWindowController {
     private struct Slide {
-        let titleKey: String
-        let bodyKey: String
-        let media: String
+        var titleKey: String?
+        var bodyKey: String?
+        var video: String?          // schermata di sola dimostrazione: niente testo
+        var isIntro = false
         var isConfig = false
     }
 
     private let slides = [
-        Slide(titleKey: "welcome.1.title", bodyKey: "welcome.1.body", media: "welcome1"),
-        Slide(titleKey: "welcome.2.title", bodyKey: "welcome.2.body", media: "welcome2"),
-        Slide(titleKey: "welcome.3.title", bodyKey: "welcome.3.body", media: "welcome3",
-              isConfig: true),
+        Slide(titleKey: "welcome.1.title", bodyKey: "welcome.1.body", isIntro: true),
+        Slide(video: "welcome2"),
+        Slide(titleKey: "welcome.3.title", bodyKey: "config.header", isConfig: true),
     ]
     private var index = 0
     private static var controllerName: String?
 
     private let titleLabel = NSTextField(labelWithString: "")
     private let bodyLabel = NSTextField(wrappingLabelWithString: "")
-    private let imageView = NSImageView()
+    private let videoView = LoopingVideoView()
     private var configView: ControllerConfigView!
     private let dots = NSStackView()
+    private let backButton = NSButton()
     private let nextButton = NSButton()
     private let resetButton = NSButton()
     private let saveButton = NSButton()
+    private let feedbackButton = NSButton()
+    private let coffeeButton = NSButton()
+    private let permissionLabel = NSTextField(wrappingLabelWithString: "")
+    private let permissionButton = NSButton()
+    private var permissionRow: NSStackView!
+    private let loginCheckbox = NSButton()
+    private var linkRow: NSStackView!
     private var buttonRow: NSStackView!
     private var contentStack: NSStackView?
+    private var bodyWidth: NSLayoutConstraint!
 
     private static var shared: WelcomeWindow?
 
@@ -62,7 +73,7 @@ final class WelcomeWindow: NSWindowController {
 
     init() {
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 520, height: 470),
+            contentRect: NSRect(x: 0, y: 0, width: 540, height: 470),
             styleMask: [.titled, .closable, .fullSizeContentView],
             backing: .buffered, defer: false
         )
@@ -72,34 +83,38 @@ final class WelcomeWindow: NSWindowController {
         window.isReleasedWhenClosed = false
         super.init(window: window)
         buildLayout()
+        // il permesso può arrivare mentre la finestra è aperta: l'utente esce,
+        // lo concede in Impostazioni e torna qui
+        NotificationCenter.default.addObserver(self, selector: #selector(externalChange),
+                                               name: PermissionsGate.granted, object: nil)
+        // l'avvio al login si cambia anche dal menu: la spunta deve seguirlo
+        NotificationCenter.default.addObserver(self, selector: #selector(externalChange),
+                                               name: LoginItem.changed, object: nil)
     }
+
+    deinit { NotificationCenter.default.removeObserver(self) }
+
+    @objc private func externalChange() { render() }
 
     required init?(coder: NSCoder) { fatalError("non usato") }
 
     private func buildLayout() {
         guard let content = window?.contentView else { return }
 
-        imageView.imageScaling = .scaleProportionallyUpOrDown
-        imageView.wantsLayer = true
-        imageView.layer?.cornerRadius = 10
-        imageView.layer?.masksToBounds = true
-        imageView.layer?.backgroundColor = NSColor.quaternaryLabelColor.withAlphaComponent(0.25).cgColor
+        titleLabel.font = .systemFont(ofSize: 24, weight: .semibold)
+        titleLabel.alignment = .center
+        titleLabel.lineBreakMode = .byWordWrapping
+
+        bodyLabel.textColor = .secondaryLabelColor
+        bodyLabel.setContentCompressionResistancePriority(.required, for: .vertical)
+
+        videoView.translatesAutoresizingMaskIntoConstraints = false
 
         configView = ControllerConfigView(controller: Self.controllerName)
         configView.translatesAutoresizingMaskIntoConstraints = false
         configView.onChangesChanged = { [weak self] hasChanges in
             self?.saveButton.isEnabled = hasChanges
         }
-
-        titleLabel.font = .systemFont(ofSize: 22, weight: .semibold)
-        titleLabel.alignment = .center
-        titleLabel.lineBreakMode = .byWordWrapping
-
-        // testo lungo: a bandiera si legge, centrato no
-        bodyLabel.font = .systemFont(ofSize: 13)
-        bodyLabel.alignment = .natural
-        bodyLabel.textColor = .secondaryLabelColor
-        bodyLabel.setContentCompressionResistancePriority(.required, for: .vertical)
 
         dots.orientation = .horizontal
         dots.spacing = 7
@@ -113,24 +128,48 @@ final class WelcomeWindow: NSWindowController {
             dots.addArrangedSubview(dot)
         }
 
-        for button in [nextButton, resetButton, saveButton] {
+        permissionLabel.alignment = .center
+        permissionLabel.font = .systemFont(ofSize: 13)
+
+        for button in [backButton, nextButton, resetButton, saveButton,
+                       feedbackButton, coffeeButton, permissionButton] {
             button.bezelStyle = .push
             button.controlSize = .large
             button.target = self
         }
+        backButton.action = #selector(goBack)
         nextButton.action = #selector(advance)
-        nextButton.keyEquivalent = "\r"
+        nextButton.keyEquivalent = "\r"        // l'unico blu: Indietro resta neutro
         resetButton.action = #selector(resetBindings)
         saveButton.action = #selector(saveBindings)
         saveButton.isEnabled = false
+        feedbackButton.action = #selector(openFeedback)
+        coffeeButton.action = #selector(openCoffee)
+        permissionButton.action = #selector(openAccessibility)
+
+        linkRow = NSStackView(views: [feedbackButton, coffeeButton])
+        linkRow.orientation = .horizontal
+        linkRow.spacing = 12
+
+        permissionRow = NSStackView(views: [permissionLabel, permissionButton])
+        permissionRow.orientation = .vertical
+        permissionRow.alignment = .centerX
+        permissionRow.spacing = 10
+
+        // due stati, non un'azione secca: dev'essere una spunta, così si vede
+        // se è già attiva senza doverla premere per scoprirlo
+        loginCheckbox.setButtonType(.switch)
+        loginCheckbox.target = self
+        loginCheckbox.action = #selector(toggleLogin)
 
         let spacer = NSView()
         spacer.setContentHuggingPriority(.init(1), for: .horizontal)
-        buttonRow = NSStackView(views: [resetButton, spacer, saveButton, nextButton])
+        buttonRow = NSStackView(views: [backButton, resetButton, spacer, saveButton, nextButton])
         buttonRow.orientation = .horizontal
         buttonRow.spacing = 10
 
-        let stack = NSStackView(views: [imageView, configView, titleLabel, bodyLabel, dots, buttonRow])
+        let stack = NSStackView(views: [titleLabel, bodyLabel, permissionRow, loginCheckbox,
+                                        linkRow, videoView, configView, dots, buttonRow])
         stack.orientation = .vertical
         stack.alignment = .centerX
         stack.spacing = 16
@@ -138,21 +177,25 @@ final class WelcomeWindow: NSWindowController {
         stack.translatesAutoresizingMaskIntoConstraints = false
         content.addSubview(stack)
 
+        bodyWidth = bodyLabel.widthAnchor.constraint(equalToConstant: 460)
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: content.leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: content.trailingAnchor),
             stack.topAnchor.constraint(equalTo: content.topAnchor, constant: 24),
             stack.bottomAnchor.constraint(equalTo: content.bottomAnchor),
-            imageView.widthAnchor.constraint(equalToConstant: 440),
-            imageView.heightAnchor.constraint(equalToConstant: 190),
-            bodyLabel.widthAnchor.constraint(equalToConstant: 440),
-            titleLabel.widthAnchor.constraint(equalToConstant: 440),
-            configView.widthAnchor.constraint(equalToConstant: 700),
-            configView.heightAnchor.constraint(equalToConstant: 430),
+            videoView.widthAnchor.constraint(equalToConstant: 600),
+            videoView.heightAnchor.constraint(equalToConstant: 338),   // 16:9 come il filmato
+            titleLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 460),
+            permissionLabel.widthAnchor.constraint(equalToConstant: 460),
+            bodyWidth,
+            configView.widthAnchor.constraint(equalToConstant: 1060),
+            configView.heightAnchor.constraint(equalToConstant: 520),
         ])
-        stack.setCustomSpacing(24, after: bodyLabel)
+        stack.setCustomSpacing(24, after: dots)
         contentStack = stack
     }
+
+    // MARK: - Azioni
 
     @objc private func advance() {
         if index >= slides.count - 1 {
@@ -160,6 +203,12 @@ final class WelcomeWindow: NSWindowController {
             return
         }
         index += 1
+        render()
+    }
+
+    @objc private func goBack() {
+        guard index > 0 else { return }
+        index -= 1
         render()
     }
 
@@ -171,25 +220,90 @@ final class WelcomeWindow: NSWindowController {
         configView.resetToDefaults()
     }
 
+    @objc private func openFeedback() {
+        Feedback.openIssues(controller: Self.controllerName)
+    }
+
+    @objc private func openCoffee() {
+        guard let url = URL(string: Feedback.coffee) else { return }
+        NSWorkspace.shared.open(url)
+    }
+
+    @objc private func openAccessibility() {
+        PermissionsGate.openSystemSettings()
+    }
+
+    @objc private func toggleLogin() {
+        LoginItem.toggle()   // la notifica rimette la spunta sullo stato vero
+    }
+
+    // MARK: - Resa
+
     private func render() {
         let slide = slides[index]
-        titleLabel.stringValue = L.t(slide.titleKey)
-        bodyLabel.stringValue = L.t(slide.bodyKey)
+        let playStation = Controllers.isPlayStation(Self.controllerName)
+        let names = Controllers.toggleNames(playStation: playStation)
+
+        // i testi citano i due tasti del comando di accensione coi nomi veri
+        // del pad collegato: View/Menu su Xbox, Create/Options su DualSense
+        titleLabel.stringValue = slide.titleKey.map(L.t) ?? ""
+        bodyLabel.stringValue = slide.bodyKey.map { String(format: L.t($0), names.left, names.right) } ?? ""
+        titleLabel.isHidden = slide.titleKey == nil
+        bodyLabel.isHidden = slide.bodyKey == nil
+
+        switch true {
+        case slide.isConfig:
+            bodyLabel.font = .systemFont(ofSize: 14)
+            bodyLabel.alignment = .center
+            bodyWidth.constant = 900
+        case slide.isIntro:
+            bodyLabel.font = .systemFont(ofSize: 13)
+            bodyLabel.alignment = .natural
+            bodyWidth.constant = 460
+        default:
+            bodyLabel.font = .systemFont(ofSize: 15)
+            bodyLabel.alignment = .center
+            bodyWidth.constant = 460
+        }
 
         configView.isHidden = !slide.isConfig
-        bodyLabel.isHidden = slide.isConfig
+        linkRow.isHidden = !slide.isIntro
+
+        // Il permesso di Accessibilità è ciò che rende l'app capace di muovere
+        // il cursore: senza, non fa niente. Lo si dice solo a chi non l'ha
+        // ancora dato — a cose fatte, un'istruzione da eseguire confonde.
+        let trusted = PermissionsGate.isTrusted
+        permissionRow.isHidden = !slide.isIntro
+        permissionButton.isHidden = trusted
+        permissionButton.title = L.t("menu.accessibility")
+        permissionLabel.stringValue = L.t(trusted ? "welcome.ax.ok" : "welcome.ax.needed")
+        permissionLabel.textColor = trusted ? .secondaryLabelColor : .labelColor
+
+        loginCheckbox.isHidden = !slide.isIntro
+        loginCheckbox.title = L.t("welcome.login")
+        // lo stato vero è quello di sistema, non quello che l'utente ha appena
+        // cliccato: se la registrazione fallisce, la spunta torna indietro
+        loginCheckbox.state = LoginItem.isEnabled ? .on : .off
         resetButton.isHidden = !slide.isConfig
         saveButton.isHidden = !slide.isConfig
-        buttonRow.alignment = slide.isConfig ? .centerY : .centerY
+        backButton.isHidden = index == 0
 
+        backButton.title = L.t("welcome.back")
         resetButton.title = L.t("keybinds.reset")
         saveButton.title = L.t("keybinds.save")
         nextButton.title = index == slides.count - 1 ? L.t("welcome.done") : L.t("welcome.next")
+        feedbackButton.title = L.t("welcome.feedback")
+        coffeeButton.title = L.t("welcome.coffee")
 
-        let image = slide.isConfig ? nil : NSImage.bundled(named: slide.media)
-        imageView.image = image
-        imageView.isHidden = image == nil
-        imageView.animates = true
+        // la dimostrazione parte solo quando è in vista: fuori resta ferma
+        if let video = slide.video {
+            videoView.load(video)
+            videoView.isHidden = false
+            videoView.play()
+        } else {
+            videoView.isHidden = true
+            videoView.pause()
+        }
 
         for (i, dot) in dots.arrangedSubviews.enumerated() {
             dot.layer?.backgroundColor = (i == index
@@ -199,26 +313,13 @@ final class WelcomeWindow: NSWindowController {
         window?.title = "CouchPilot"
         configView.needsDisplay = true
 
-        // la finestra si adatta alla scheda: la configurazione è larga, le
-        // schede di testo no, e le lingue occupano altezze diverse
+        // la finestra si adatta alla scheda: l'assegnazione è larga, le schede
+        // di testo no, e le lingue occupano altezze diverse
         contentStack?.layoutSubtreeIfNeeded()
         if let fitting = contentStack?.fittingSize {
-            window?.setContentSize(NSSize(width: slide.isConfig ? 760 : 520,
-                                          height: fitting.height + 24))
+            let width: CGFloat = slide.isConfig ? 1120 : (slide.video != nil ? 680 : 540)
+            window?.setContentSize(NSSize(width: width, height: fitting.height + 24))
         }
         window?.invalidateCursorRects(for: configView)
-    }
-}
-
-private extension NSImage {
-    // Cerca il file tra i formati che ci interessano; nil se non c'è.
-    static func bundled(named name: String) -> NSImage? {
-        for ext in ["gif", "png", "jpg"] {
-            if let url = Bundle.main.url(forResource: name, withExtension: ext),
-               let image = NSImage(contentsOf: url) {
-                return image
-            }
-        }
-        return nil
     }
 }

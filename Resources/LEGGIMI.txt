@@ -1,23 +1,27 @@
-File attesi in questa cartella (tutti facoltativi: se mancano, la guida
-mostra solo il testo e non si rompe nulla).
+File di questa cartella (tutti facoltativi: se mancano, la guida rapida
+funziona lo stesso, mostra solo il testo e il riquadro resta vuoto).
+Questo LEGGIMI non finisce dentro l'app: build.sh lo esclude.
 
-SCHEMA DEL CONTROLLER — terza scheda
+SCHEMA DEL CONTROLLER — terza scheda, Assegnazione tasti
   controller.png             sagoma Xbox (predefinita)
   controller-dualsense.png   sagoma DualSense, usata quando l'app rileva
                              un pad PlayStation
-  Entrambe 700x480, tratto grigio su sfondo TRASPARENTE.
-                   consigliato ~900 px di larghezza, grigio medio così si
-                   vede bene sia in tema chiaro sia in tema scuro.
-                   Va bene anche controller.pdf (vettoriale, meglio).
+  Entrambe 700x480, tratto grigio su sfondo TRASPARENTE, grigio medio così
+  si vede bene sia in tema chiaro sia in tema scuro. Va bene anche
+  controller.pdf (vettoriale, meglio).
   L'app ci disegna sopra le linee di richiamo e le etichette tradotte.
-  Gli agganci sono in ControllerDiagram.swift, in frazioni del riquadro
-  (-1..1 da sinistra a destra, -1..1 dal basso in alto): dopo aver messo
-  l'immagine vanno ritarati una volta sola.
+  Gli agganci stanno in Keybinds.swift, in frazioni del riquadro
+  (-1..1 da sinistra a destra, -1..1 dal basso in alto): cambiando immagine
+  vanno ritarati una volta sola.
   ⚠️ Serve un'immagine con licenza libera (CC0) o disegnata da noi: le
   schermate prese da siti o da altri programmi non si possono pubblicare.
 
-GIF DIMOSTRATIVE — prime due schede
-  welcome1.gif  movimento e click
-  welcome2.gif  media, volume, on/off
-  Misura consigliata 880x400 px. Per convertirle:
-    swift note-private/videotogif.swift clip.mov --fps 12 --width 880
+DIMOSTRAZIONE — seconda scheda
+  welcome2.mp4  riproduzione continua, muta, senza comandi. È l'unica cosa
+                su quella scheda, quindi deve spiegarsi da sola.
+  1280x720, 30 fps, ~2 Mbps. Un filmato e non una GIF: a parità di peso ha
+  il triplo dei pixel e il triplo dei fotogrammi.
+  Per ricavarlo da una ripresa qualsiasi — accelera da sé per rientrare nei
+  secondi richiesti, non serve tagliarla prima:
+    swiftc -O -o /tmp/vtc Tools/videotoclip.swift
+    /tmp/vtc ripresa.mov Resources/welcome2.mp4 --seconds 6.5 --width 1280 --fps 30 --mbps 2.0
