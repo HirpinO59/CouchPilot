@@ -78,18 +78,37 @@ The app activates when a controller connects and deactivates when it disconnects
 ### From a release
 
 1. Download `CouchPilot-1.0.0.dmg` from [Releases](../../releases), open it and drag **CouchPilot** onto the **Applications** shortcut.
-2. First launch: macOS will block the app because it is not notarized. Go to **System Settings → Privacy & Security**, scroll down and click **"Open Anyway"**.
-3. Grant the **Accessibility** permission when asked (System Settings → Privacy & Security → Accessibility). CouchPilot needs it to move the cursor and press keys — the menu bar icon shows ⚠️ until granted, and a menu item takes you to the right pane.
+
+2. **Open it once and let macOS refuse.** Double-click CouchPilot in Applications; a dialog says it can't be opened because Apple can't check it for malicious software. Click **Done** — this step is not optional, it is what makes the next one appear.
+
+3. Open **System Settings → Privacy & Security**, scroll down to **Security**. There is now a line saying CouchPilot was blocked, with an **"Open Anyway"** button. Click it, authenticate, and confirm in the last dialog. You only do this once.
+
+4. Grant the **Accessibility** permission when asked (System Settings → Privacy & Security → Accessibility). CouchPilot needs it to move the cursor and press keys — the menu bar icon shows ⚠️ until granted, and a menu item takes you straight to the right pane.
+
+Prefer the terminal? One line does steps 2 and 3 at once:
+
+```bash
+xattr -dr com.apple.quarantine /Applications/CouchPilot.app
+```
 
 CouchPilot lives in the menu bar: it has **no Dock icon and no window**, so it won't show up in Launchpad. Look for the controller icon next to the clock.
 
-> Note: after an update you may need to grant Accessibility again — unsigned builds look like a new app to macOS each time.
+<details>
+<summary><b>Why does macOS block it?</b></summary>
 
-Comfortable with the terminal? This removes the quarantine flag and skips the whole dialog dance:
+Because CouchPilot is **not notarized**. Notarizing means uploading each build to Apple for an automated malware scan, and that requires a paid Apple Developer Program membership (99 €/year). This is a free app that collects nothing and makes no money, so it doesn't have one.
+
+The app *is* code-signed, and the signature is intact — you can check it yourself before trusting it:
 
 ```bash
-xattr -d com.apple.quarantine /Applications/CouchPilot.app
+codesign --verify --deep --strict --verbose=2 /Applications/CouchPilot.app
+spctl -a -vvv /Applications/CouchPilot.app
 ```
+
+The first command confirms nothing has been tampered with since it was built. The second will say `rejected`: that is Gatekeeper reporting the missing notarization, not a problem with the app.
+
+If you'd rather not take anyone's word for it, **build it yourself** from the section below — the source is all here, it takes one command, and a build signed on your own Mac raises no warnings at all.
+</details>
 
 ### From source (no Gatekeeper prompts)
 

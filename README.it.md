@@ -20,6 +20,25 @@ Lo script compila con SPM, assembla `build/CouchPilot.app` e firma con l'identit
 
 **Primo avvio:** macOS chiede il permesso Accessibilità. Concedilo in Impostazioni di Sistema → Privacy e Sicurezza → Accessibilità (l'icona in menu bar mostra ⚠️ finché manca; c'è la voce di menu che apre il pannello giusto). Dopo la concessione non serve riavviare l'app.
 
+## Distribuzione
+
+```bash
+./build.sh dmg   # produce build/CouchPilot-<versione>.dmg da allegare alla release
+```
+
+Il disco contiene l'app e la scorciatoia ad Applications su cui trascinarla (~2,9 MB).
+
+**L'app non è notarizzata**, e questo è il punto che va capito bene. La firma attuale è un certificato **Apple Development**, che vale solo sulle macchine registrate al tuo account: sul Mac di chiunque altro Gatekeeper la rifiuta. Verificato, non supposto — con la quarantena che mette il browser:
+
+```
+spctl -a -vvv CouchPilot.app  →  rejected
+codesign --verify --deep --strict  →  firma valida e integra
+```
+
+Quindi il file non è rotto e non è manomesso: manca solo il timbro di Apple. Chi scarica deve provare ad aprirla una volta, farsela rifiutare, e poi usare **Apri comunque** in Impostazioni di Sistema → Privacy e Sicurezza (il pulsante compare *solo dopo* il tentativo fallito). In alternativa `xattr -dr com.apple.quarantine`. La procedura è scritta passo per passo nel [README inglese](README.md#install), che è quello che leggono gli utenti.
+
+Per togliere del tutto l'avviso servono tre cose: iscrizione all'**Apple Developer Program** (99 €/anno), un certificato **Developer ID Application** al posto di quello di sviluppo, e la notarizzazione (`xcrun notarytool submit` + `stapler staple`). Gli account gratuiti non possono generare quel certificato: è un vincolo di Apple. Il giorno che serve, in `build.sh` cambia solo l'identità di firma e si aggiungono i due comandi.
+
 ## Mappatura
 
 | Input | Azione |
