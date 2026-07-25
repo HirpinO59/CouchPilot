@@ -1,0 +1,37 @@
+CouchPilot — Source-Available Licence
+Copyright (c) 2026 HirpinO59
+
+The source code of this project is published for one reason: CouchPilot asks
+for the Accessibility permission, which is a lot to ask, and you should be
+able to read exactly what it does with it instead of taking anyone's word.
+
+YOU MAY
+
+  - read, study and audit the source code;
+  - build the application from this source and use it on machines you own
+    or control, for as long as you like, at no cost;
+  - quote parts of the code when reporting a bug or suggesting a change.
+
+YOU MAY NOT
+
+  - redistribute the source code or a built copy of the application, in
+    original or modified form;
+  - publish derivative works or forks;
+  - reuse the source code, in whole or in part, in another project;
+  - use it commercially, or charge anyone for it.
+
+This is NOT an open-source licence. It is not approved by the Open Source
+Initiative and it deliberately does not grant the redistribution freedoms an
+open-source licence would. "Source available" is the accurate description.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+If you want to do something this licence does not cover — package it, ship it
+with something else, build on it — just ask. The answer will probably be yes.
+
+gamerfromif95@gmail.com

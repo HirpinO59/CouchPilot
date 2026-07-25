@@ -150,6 +150,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         return url.deletingPathExtension().lastPathComponent
     }
 
+    // ☰ dal pad apre e chiude: il driver deve sapere qual è lo stato attuale,
+    // altrimenti la seconda pressione riaprirebbe invece di chiudere.
+    func menuWillOpen(_ menu: NSMenu) {
+        if menu === rootMenu { driver.setMenuOpen(true) }
+    }
+
+    func menuDidClose(_ menu: NSMenu) {
+        if menu === rootMenu { driver.setMenuOpen(false) }
+    }
+
     func menuNeedsUpdate(_ menu: NSMenu) {
         if menu === rootMenu {
             refreshBattery()

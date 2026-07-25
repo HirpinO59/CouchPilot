@@ -174,11 +174,15 @@ No GitHub account? The menu also has **"Send an email…"**, which opens a draft
 
 CouchPilot is free and always will be. If it saved you a trip across the room, you can [buy me a coffee](https://ko-fi.com/hirpino59) — entirely optional, and it changes nothing about the app.
 
+## Security
+
+How the Accessibility permission is used, the one place the app reads input, and how to verify a download before trusting it: [SECURITY.md](SECURITY.md). Vulnerabilities go to `gamerfromif95@gmail.com`, not to a public issue.
+
 ## License
 
 The source is published so you can see exactly what the app does with the Accessibility permission, and so you can build it yourself instead of trusting a download.
 
-**It is not open source.** There is no licence granting redistribution: you may read the code and build it for your own use, but not publish it, modified or otherwise. If you want to do something with it that this doesn't cover, ask — the answer will probably be yes.
+**It is not open source** — [source-available](LICENSE) is the accurate word. You may read the code and build it for your own use; you may not redistribute it or publish modified versions. If you want to do something the licence doesn't cover, ask — the answer will probably be yes.
 
 ---
 

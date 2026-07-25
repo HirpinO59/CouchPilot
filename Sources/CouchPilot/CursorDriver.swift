@@ -82,6 +82,7 @@ final class CursorDriver {
     // e si annulla se nel frattempo è arrivato l'altro tasto della coppia.
     private var menuPressed = false
     private var menuVetoed = false
+    private var menuOpen = false
 
 
     // callback sul main thread
@@ -146,6 +147,12 @@ final class CursorDriver {
         queue.async { self.screenMap = map }
     }
 
+    // Lo stato del menu arriva dall'AppDelegate: serve al driver per sapere se
+    // il prossimo ☰ deve aprirlo o chiuderlo.
+    func setMenuOpen(_ open: Bool) {
+        queue.async { self.menuOpen = open }
+    }
+
     func calibrate(duration: TimeInterval = 2.0) {
         queue.async {
             guard self.gamepad != nil else { return }
@@ -192,7 +199,14 @@ final class CursorDriver {
             if !menuPressed { menuVetoed = false }
             menuVetoed = menuVetoed || view
         } else if menuPressed, !menuVetoed, enabled {
-            DispatchQueue.main.async { self.onOpenMenu?() }
+            if menuOpen {
+                // Un menu aperto tiene il thread principale nel suo ciclo di
+                // tracciamento: un secondo click programmatico non arriverebbe
+                // mai. Esc lo chiude, e parte da qui senza passare dal main.
+                poster.keyCombo(53)
+            } else {
+                DispatchQueue.main.async { self.onOpenMenu?() }
+            }
         }
         menuPressed = menu
 
