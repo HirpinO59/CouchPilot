@@ -21,6 +21,10 @@
   <a href="README.it.md">Leggilo in italiano</a>
 </p>
 
+<p align="center">
+  <img src="docs/images/demo.gif" width="640" alt="Browsing YouTube, opening Mission Control and switching apps with a controller">
+</p>
+
 ---
 
 Written in Swift with **zero external dependencies** and **zero data collection**. Connect a controller and your Mac answers to it — no configuration required to start.

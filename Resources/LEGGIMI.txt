@@ -24,4 +24,9 @@ DIMOSTRAZIONE — seconda scheda
   Per ricavarlo da una ripresa qualsiasi — accelera da sé per rientrare nei
   secondi richiesti, non serve tagliarla prima:
     swiftc -O -o /tmp/vtc Tools/videotoclip.swift
-    /tmp/vtc ripresa.mov Resources/welcome2.mp4 --seconds 6.5 --width 1280 --fps 30 --mbps 2.0
+    /tmp/vtc ripresa.mov Resources/welcome2.mp4 --seconds 5 --width 1280 --fps 30 --mbps 2.0
+
+  Per il README serve invece una GIF, perché su GitHub i filmati non partono
+  da soli — Tools/videotogif.swift, stessa logica:
+    swiftc -O -o /tmp/vtg Tools/videotogif.swift
+    /tmp/vtg ripresa.mov docs/images/demo.gif --seconds 5 --width 640 --fps 10

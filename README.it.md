@@ -2,7 +2,11 @@
 
 > [Read this in English](README.md)
 
-App macOS in menu bar: colleghi un controller Xbox e comandi il Mac dal divano — cursore, click, scroll, volume, Mission Control. Scritta in Swift, zero dipendenze esterne.
+App macOS in menu bar: colleghi un controller — Xbox, DualSense o qualunque pad riconosciuto da macOS — e comandi il Mac dal divano: cursore, click, scroll, volume, Mission Control. Scritta in Swift, zero dipendenze esterne.
+
+<p align="center">
+  <img src="docs/images/demo.gif" width="640" alt="YouTube, Mission Control e cambio app col controller">
+</p>
 
 **Versione 1.0.0.** Questo è il documento tecnico completo; il [README inglese](README.md) è la vetrina per gli utenti.
 
