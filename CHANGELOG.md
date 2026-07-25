@@ -1,4 +1,5 @@
 # Changelog
+
 ## Unreleased
 
 - ☰ pressed a second time now closes the menu instead of doing nothing. An open menu holds the main thread in its own tracking loop, so a second synthetic click never arrived; the driver sends Esc instead, straight from its own queue
