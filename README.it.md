@@ -149,6 +149,14 @@ Il permesso di Accessibilità serve a *generare* eventi di mouse e tastiera. C'�
 
 Restano sul Mac e non escono mai da lì: le preferenze (`UserDefaults`), un file di log tecnico in `~/Library/Logs/CouchPilot.log` con connessioni del pad ed errori. Per mostrare la batteria del controller l'app interroga `system_profiler` in locale.
 
+## Licenza
+
+Il sorgente è pubblico per due motivi: perché chiunque possa verificare cosa fa l'app col permesso di Accessibilità, e perché possa compilarsela da sé invece di fidarsi di un file scaricato.
+
+**Non è open source.** Non c'è alcuna licenza che conceda la ridistribuzione: si può leggere il codice e compilarlo per uso proprio, non pubblicarlo, né modificato né identico. Senza un file `LICENSE` valgono i diritti d'autore per impostazione predefinita — tutti i diritti riservati — ed è voluto.
+
+Va tenuto presente in due punti: **r/opensource e i sub analoghi non accettano il progetto** (pretendono una licenza OSI), e nei testi di presentazione non va mai scritto "open source", che sarebbe falso. Si dice "gratis, con il sorgente pubblico".
+
 ## Icona
 
 Disegnata da codice in [Tools/makeicon.swift](Tools/makeicon.swift) con CoreGraphics: nessun file grafico binario nel progetto, si rigenera e si modifica cambiando i numeri nello script. `build.sh` la ricostruisce da sé quando lo script cambia, e assembla l'`.icns` con `iconutil`.
