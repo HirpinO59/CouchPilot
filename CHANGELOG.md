@@ -8,7 +8,9 @@ Everything in this release comes from what people asked for after 1.0.0.
 
 - **The controller is now recognised by the profile it declares to macOS, not by its name.** The old check treated any pad whose name contained "Wireless Controller" as a PlayStation pad — which is right for a DualShock 4, and wrong for every third-party pad with a longer name. Those pads were shown a DualSense with ✕ ◯ ▢ △ on buttons labelled A B X Y
 - **Triggers are named after the pad**: LT/RT on Xbox and 8BitDo, L2/R2 on PlayStation. They appear in the keybinds header and in Settings, where the two items now read *RT precision* / *LT boost* and follow the pad as it changes
-- **8BitDo pads are recognised as their own family**: Xbox-style letters, and the two centre buttons called − and + as they are on the pad. They currently borrow the Xbox diagram — a drawing of their own is coming
+- **8BitDo pads are recognised as their own family**, with their own diagram: Xbox-style letters, and the two centre buttons called − and + as they are on the pad. Asymmetric sticks, left stick above the D-pad, like the Ultimate Wireless this was drawn from
+- **The DualSense diagram has been redrawn**, more faithful and in the same hand as the 8BitDo one. Brand logos are gone from both: where the PlayStation logo was there is now a plain empty circle, and the 8BitDo home button keeps its rings without the mark inside
+- Every label anchor was re-measured on the new drawings, and the leader lines were checked pair by pair on all three pads: no crossings
 
 ### Other changes
 

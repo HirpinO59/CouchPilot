@@ -162,8 +162,15 @@ final class ControllerConfigView: NSView {
         let rightWidth = columnWidth(.right)
         let leftEdge = sideMargin + leftWidth
         let rightEdge = bounds.width - sideMargin - rightWidth
-        let artWidth = min(rightEdge - leftEdge - leaderGap * 2, canvas.width * 0.5)
-        let artHeight = min(artWidth * aspect, canvas.height - 24)
+        var artWidth = min(rightEdge - leftEdge - leaderGap * 2, canvas.width * 0.5)
+        var artHeight = artWidth * aspect
+        // Un disegno più alto che largo non va schiacciato per stare in altezza:
+        // si rimpicciolisce, perché gli agganci sono normalizzati sul riquadro e
+        // seguono le proporzioni dell'immagine.
+        if artHeight > canvas.height - 24 {
+            artHeight = canvas.height - 24
+            artWidth = artHeight / aspect
+        }
         let artRect = NSRect(x: (leftEdge + rightEdge) / 2 - artWidth / 2,
                              y: canvas.midY - artHeight / 2,
                              width: artWidth, height: artHeight)
