@@ -142,7 +142,9 @@ defaults write com.hirpino.couchpilot maxSpeed -float 1400
 
 ## Privacy
 
-L'app non raccoglie, non salva e non trasmette alcun dato personale. Non contiene codice di rete: non si collega a nessun server, non ha analytics né telemetria.
+L'app non raccoglie, non salva e non trasmette alcun dato personale: nessun server, nessun analytics, nessuna telemetria.
+
+Fa **una sola** richiesta di rete, e solo per gli aggiornamenti: chiede all'API pubblica di GitHub il numero dell'ultima versione pubblicata (`releases/latest`), una volta all'avvio e poi non più di una al giorno. Non manda niente — nessun identificativo, nessun dato d'uso — e la risposta serve solo a scrivere una riga diversa nel menu; lo scaricamento resta un gesto dell'utente, nel browser. Con **Impostazioni → Controlla aggiornamenti** spento non contatta nessuno. Sta tutto in `Sources/CouchPilot/UpdateCheck.swift`.
 
 Il permesso di Accessibilità serve a *generare* eventi di mouse e tastiera. C'è un solo punto in cui CouchPilot legge l'input: mentre stai registrando un'assegnazione in "Assegnazione tasti" apre un tap sugli eventi, per catturare il tasto, la combinazione o il click che premi — compresi i tasti multimediali, che macOS non consegna mai alle app come normali eventi di tastiera. Quel tap vive solo durante la registrazione: si chiude quando finisci, quando la finestra perde il fuoco o viene chiusa, e comunque dopo 20 secondi. Di quello che premi non resta niente tranne l'assegnazione che hai scelto, e niente esce dal Mac. Sta tutto in un file leggibile dall'inizio alla fine: [`InputCapture.swift`](Sources/CouchPilot/InputCapture.swift).
 

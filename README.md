@@ -7,7 +7,7 @@
 <p align="center">
   <b>Control your Mac from the couch with a game controller.</b><br>
   Cursor, clicks, scrolling, media keys, Mission Control — from a menu bar app with no dependencies,
-  no network code and nothing to configure before it works.
+  nothing to collect and nothing to configure before it works.
 </p>
 
 <p align="center">
@@ -148,7 +148,9 @@ defaults write com.hirpino.couchpilot maxSpeed -float 1800
 
 ## Privacy
 
-CouchPilot collects nothing. There is **no network code** in the app — no servers, no analytics, no telemetry. Preferences and a small technical log (`~/Library/Logs/CouchPilot.log`) stay on your Mac.
+CouchPilot collects nothing. No servers, no analytics, no telemetry: preferences and a small technical log (`~/Library/Logs/CouchPilot.log`) stay on your Mac.
+
+The app makes **one** kind of network request, and only for updates: it asks GitHub's public API for the version number of the latest release, once at launch and at most once a day. Nothing is sent — no identifier, no usage data — and the answer only changes a line in the menu; downloading stays your move, in your browser. Turn off **Settings → Check for updates** and the app contacts nobody at all. It is one file: [`UpdateCheck.swift`](Sources/CouchPilot/UpdateCheck.swift).
 
 The Accessibility permission is used to *generate* mouse and keyboard events. CouchPilot reads input in exactly one place: while you are recording a binding in the Keybinds screen, it opens an event tap so it can capture the key, combination or click you press — including media keys, which macOS never delivers to apps as ordinary key events. That tap exists only during the recording: it closes when you finish, when the window loses focus or is closed, and in any case after 20 seconds. Nothing you press is stored except the one binding you chose, and nothing ever leaves your Mac. It lives in one file you can read end to end: [`InputCapture.swift`](Sources/CouchPilot/InputCapture.swift).
 

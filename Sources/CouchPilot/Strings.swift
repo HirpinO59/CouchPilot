@@ -124,6 +124,11 @@ enum L {
         // %@ è la versione installata: la pagina che si apre mostra l'ultima.
         "menu.updates": ["it": "Controlla aggiornamenti (%@)", "en": "Check for updates (%@)",
                          "es": "Buscar actualizaciones (%@)", "zh": "检查更新 (%@)"],
+        // %@ è la versione appena pubblicata su GitHub.
+        "menu.updateAvailable": ["it": "Disponibile la versione %@ →", "en": "Version %@ available →",
+                                 "es": "Versión %@ disponible →", "zh": "有新版本 %@ →"],
+        "set.checkUpdates": ["it": "Controlla aggiornamenti", "en": "Check for updates",
+                             "es": "Buscar actualizaciones", "zh": "检查更新"],
         "keybinds.save": ["it": "Salva", "en": "Save", "es": "Guardar", "zh": "保存"],
         "keybinds.reset": ["it": "Ripristina", "en": "Reset", "es": "Restablecer", "zh": "恢复默认"],
         "keybinds.close": ["it": "Chiudi", "en": "Close", "es": "Cerrar", "zh": "关闭"],

@@ -14,7 +14,7 @@ Everything in this release comes from what people asked for after 1.0.0.
 
 ### Other changes
 
-- **Check for updates** in the menu, showing the installed version. It opens the releases page in your browser: the app still makes no network calls of its own
+- **Update checking**, and with it the first network request in the app's life — worth stating plainly, because up to 1.0.0 there was none and the README said so. CouchPilot asks GitHub's public API for the version number of the latest release, once at launch and at most once a day. Nothing is sent: no identifier, no usage data, User-Agent `CouchPilot` and nothing else. When there is a newer version the menu says so, and the click opens the releases page — downloading stays your move. **Settings → Check for updates** turns it off, and off means the app contacts nobody at all. It is one readable file, `UpdateCheck.swift`, and README and SECURITY.md have been rewritten to say exactly this
 - **Keybinds opens as its own window**, no longer as the third page of the quick guide — no step dots, no *Next*, just the screen and a *Close* button
 - **A button can now open an app.** In the keybinds screen, each button's menu has *Open an app…* — pick Steam, CrossOver, anything in Applications, and that button launches it (or brings it to the front if it's already running). Asked for on the first day by r/macgaming
 - ☰ pressed a second time now closes the menu instead of doing nothing. An open menu holds the main thread inside its own tracking loop, so the second synthetic click never arrived; the driver sends Esc instead, straight from its own queue

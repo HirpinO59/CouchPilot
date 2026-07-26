@@ -30,6 +30,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let exclusionsMenu = NSMenu()
     private let languageMenu = NSMenu()
     private var rootMenu: NSMenu?
+    private var updatesItem: NSMenuItem!
+    private var checkUpdatesItem: NSMenuItem!
     private var presetSubmenus: [(menu: NSMenu, key: String)] = []
     // Le due voci che citano un grilletto nel titolo: la sigla cambia col pad
     // collegato, quindi vanno riscritte quando il pad cambia.
@@ -94,6 +96,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if !trusted { startTrustPolling() }
         refreshUI()
         WelcomeWindow.showIfFirstRun(controller: controllerName)
+        // il controllo va in rete e risponde quando risponde: il menu si
+        // riscrive da sé alla prossima apertura
+        UpdateCheck.run { [weak self] in self?.refreshUI() }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -294,12 +299,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         guideItem.target = self
         menu.addItem(guideItem)
 
-        // La versione installata sta nel titolo: la pagina che si apre mostra
-        // l'ultima, e il confronto si fa a occhio senza chiedere niente alla rete.
+        // Di norma mostra la versione installata; quando GitHub ne annuncia una
+        // più recente, la voce lo dice. In entrambi i casi il clic apre la
+        // pagina: lo scaricamento resta un gesto dell'utente.
         if Feedback.hasIssues {
-            let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
-            let updatesItem = NSMenuItem(title: L.t("menu.updates", version),
-                                         action: #selector(openReleases), keyEquivalent: "")
+            updatesItem = NSMenuItem(title: L.t("menu.updates", UpdateCheck.installedVersion),
+                                     action: #selector(openReleases), keyEquivalent: "")
             updatesItem.target = self
             menu.addItem(updatesItem)
         }
@@ -395,6 +400,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         gamesPauseItem.target = self
         settingsMenu.addItem(gamesPauseItem)
 
+        // Spento, l'app non contatta nessuno: è l'unica cosa che manda in rete.
+        checkUpdatesItem = NSMenuItem(title: L.t("set.checkUpdates"),
+                                      action: #selector(toggleCheckUpdates), keyEquivalent: "")
+        checkUpdatesItem.target = self
+        settingsMenu.addItem(checkUpdatesItem)
+
         settingsMenu.addItem(.separator())
 
         languageMenu.removeAllItems()
@@ -455,7 +466,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         enabledItem.state = enabled ? .on : .off
         gamesPauseItem.state = UserDefaults.standard.bool(forKey: "autoPauseGames") ? .on : .off
+        if let checkUpdatesItem { checkUpdatesItem.state = UpdateCheck.enabled ? .on : .off }
         for (item, key) in triggerTitleItems { item.title = presetTitle(key) }
+        if let updatesItem {
+            updatesItem.title = UpdateCheck.available.map { L.t("menu.updateAvailable", $0) }
+                ?? L.t("menu.updates", UpdateCheck.installedVersion)
+        }
         axItem.isHidden = trusted
         loginItem.state = SMAppService.mainApp.status == .enabled ? .on : .off
     }
@@ -511,6 +527,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func toggleEnabled() {
         driver.setEnabled(!enabled)
+    }
+
+    @objc private func toggleCheckUpdates() {
+        UpdateCheck.enabled = !UpdateCheck.enabled
+        // appena riaccesa, chiede subito: chi la accende vuole sapere adesso
+        if UpdateCheck.enabled { UpdateCheck.run(force: true) { [weak self] in self?.refreshUI() } }
+        refreshUI()
     }
 
     @objc private func toggleGamesPause() {
