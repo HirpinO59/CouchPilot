@@ -431,6 +431,10 @@ final class ControllerConfigView: NSView {
             record.target = self
             record.representedObject = control.id
             menu.addItem(record)
+            let pickApp = NSMenuItem(title: L.t("bind.app"), action: #selector(chooseApp(_:)), keyEquivalent: "")
+            pickApp.target = self
+            pickApp.representedObject = control.id
+            menu.addItem(pickApp)
             let clear = NSMenuItem(title: L.t("action.none"), action: #selector(pickBinding(_:)), keyEquivalent: "")
             clear.target = self
             clear.representedObject = [control.id, Binding.none.raw]
@@ -463,6 +467,27 @@ final class ControllerConfigView: NSView {
         guard let id = sender.representedObject as? String,
               let control = PadControl.all.first(where: { $0.id == id }) else { return }
         startCapture(for: control)
+    }
+
+    // Un'app non si può "registrare" premendola: si sceglie. Il selettore parte
+    // da /Applications e accetta solo applicazioni.
+    @objc private func chooseApp(_ sender: NSMenuItem) {
+        guard let id = sender.representedObject as? String,
+              let control = PadControl.all.first(where: { $0.id == id }) else { return }
+        let panel = NSOpenPanel()
+        panel.message = L.t("bind.appPanel")
+        panel.prompt = L.t("bind.appChoose")
+        panel.directoryURL = URL(fileURLWithPath: "/Applications")
+        panel.allowedContentTypes = [.application]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.treatsFilePackagesAsDirectories = false
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        guard let bundleID = Bundle(url: url)?.bundleIdentifier else {
+            Log.write("assegnazione app: \(url.lastPathComponent) non ha un identificativo, ignorata")
+            return
+        }
+        apply(.app(bundleID), to: control)
     }
 
     private func apply(_ binding: Binding, to control: PadControl) {

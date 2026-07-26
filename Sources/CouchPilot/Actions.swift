@@ -37,6 +37,7 @@ enum Binding: Equatable {
     case mouse(MouseButton)
     case media(MediaKey)
     case system(SystemShortcut)
+    case app(String)        // identificativo del bundle, es. com.valvesoftware.steam
 
     // Solo questi modificatori vengono conservati: gli altri bit (fn, blocco
     // maiuscole, tastierino) arrivano sporchi dall'evento e li rimette
@@ -52,6 +53,7 @@ enum Binding: Equatable {
         case .mouse(let button): return "mouse:\(button.rawValue)"
         case .media(let key): return "media:\(key.rawValue)"
         case .system(let shortcut): return "system:\(shortcut.rawValue)"
+        case .app(let id): return "app:\(id)"
         }
     }
 
@@ -74,6 +76,11 @@ enum Binding: Equatable {
         case "system":
             guard parts.count == 2, let shortcut = SystemShortcut(rawValue: parts[1]) else { return nil }
             self = .system(shortcut)
+        case "app":
+            // l'identificativo contiene punti ma non due punti: si ricompone
+            let id = parts.dropFirst().joined(separator: ":")
+            guard !id.isEmpty else { return nil }
+            self = .app(id)
         default:
             return nil
         }
@@ -112,7 +119,18 @@ enum Binding: Equatable {
         case .mouse(let button): return L.t(button.titleKey)
         case .media(let key): return L.t(key.titleKey)
         case .system(let shortcut): return L.t(shortcut.titleKey)
+        case .app(let id): return Self.appName(id)
         }
+    }
+
+    // Nome leggibile dell'app: quello che vedi nel Finder, tradotto se l'app lo
+    // è. Se l'app non c'è più resta l'identificativo, così si capisce cosa era.
+    static func appName(_ bundleID: String) -> String {
+        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else {
+            return bundleID
+        }
+        return FileManager.default.displayName(atPath: url.path)
+            .replacingOccurrences(of: ".app", with: "")
     }
 
     static func describe(_ code: CGKeyCode, _ flags: CGEventFlags) -> String {

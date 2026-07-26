@@ -360,6 +360,23 @@ final class CursorDriver {
         case .key(let code, let flags): poster.keyCombo(code, flags)
         case .media(let key): poster.mediaKey(key)
         case .system(let shortcut): poster.systemShortcut(shortcut)
+        case .app(let id): Self.openApp(id)
+        }
+    }
+
+    // Apre l'app, o la porta davanti se è già aperta — è quello che si aspetta
+    // chi premerà quel tasto. NSWorkspace va usato dal thread principale.
+    private static func openApp(_ bundleID: String) {
+        DispatchQueue.main.async {
+            guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else {
+                Log.write("apri app: \(bundleID) non è installata")
+                return
+            }
+            let options = NSWorkspace.OpenConfiguration()
+            options.activates = true
+            NSWorkspace.shared.openApplication(at: url, configuration: options) { _, error in
+                if let error { Log.write("apri app \(bundleID): \(error.localizedDescription)") }
+            }
         }
     }
 

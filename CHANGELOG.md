@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## 1.0.1 — 2026-07-26
 
-- ☰ pressed a second time now closes the menu instead of doing nothing. An open menu holds the main thread in its own tracking loop, so a second synthetic click never arrived; the driver sends Esc instead, straight from its own queue
+- **A button can now open an app.** In the keybinds screen, each button's menu has *Open an app…* — pick Steam, CrossOver, anything in Applications, and that button launches it (or brings it to the front if it's already running). Asked for on the first day by r/macgaming
+- ☰ pressed a second time now closes the menu instead of doing nothing. An open menu holds the main thread inside its own tracking loop, so the second synthetic click never arrived; the driver sends Esc instead, straight from its own queue
+- **Calibrate sticks** is gone from the menu. It sampled two seconds of stick rest position, which is not how drift actually behaves — it will come back when it works properly
 - Added `LICENSE` (source-available, not open source) and `SECURITY.md`
 
 ## 1.0.0 — 2026-07-25

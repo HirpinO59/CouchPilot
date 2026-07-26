@@ -17,7 +17,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // menu si ricostruisce e le etichette vanno ricalcolate da qui.
     private var controllerName: String?
     private var pauseReason: String?
-    private var calibrating = false
     private var battery: BatteryReader.Reading?
     private var lastBatteryCheck = 0.0
     private var batteryRetries = 0
@@ -25,7 +24,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let statusInfoItem = NSMenuItem()
     private let pauseInfoItem = NSMenuItem()
     private var enabledItem: NSMenuItem!
-    private var calibrateItem: NSMenuItem!
     private var gamesPauseItem: NSMenuItem!
     private var loginItem: NSMenuItem!
     private var axItem: NSMenuItem!
@@ -45,10 +43,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         driver.onEnabledChanged = { [weak self] on in
             self?.enabled = on
-            self?.refreshUI()
-        }
-        driver.onCalibrationDone = { [weak self] in
-            self?.calibrating = false
             self?.refreshUI()
         }
         // ☰ da solo apre il menu in barra: un click finto sull'icona, così si
@@ -277,10 +271,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         enabledItem.target = self
         menu.addItem(enabledItem)
 
-        calibrateItem = NSMenuItem(title: L.t("menu.calibrate"), action: #selector(calibrate), keyEquivalent: "")
-        calibrateItem.target = self
-        menu.addItem(calibrateItem)
-
         menu.addItem(buildSettingsItem())
         menu.addItem(.separator())
 
@@ -436,8 +426,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         pauseInfoItem.isHidden = !suspended
 
         enabledItem.state = enabled ? .on : .off
-        calibrateItem.title = calibrating ? L.t("menu.calibrating") : L.t("menu.calibrate")
-        calibrateItem.isEnabled = monitor.current != nil && !calibrating
         gamesPauseItem.state = UserDefaults.standard.bool(forKey: "autoPauseGames") ? .on : .off
         axItem.isHidden = trusted
         loginItem.state = SMAppService.mainApp.status == .enabled ? .on : .off
@@ -500,12 +488,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let d = UserDefaults.standard
         d.set(!d.bool(forKey: "autoPauseGames"), forKey: "autoPauseGames")
         evaluateSuspension()
-    }
-
-    @objc private func calibrate() {
-        calibrating = true
-        refreshUI()
-        driver.calibrate()
     }
 
     @objc private func toggleLogin() {

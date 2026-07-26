@@ -37,7 +37,7 @@ Written in Swift with **zero external dependencies** and **zero data collection*
 - **Media keys**: play/pause, volume with hold-to-repeat, previous/next track
 - **Mission Control, Spaces, Show Desktop** — invoked through *your* configured macOS shortcuts, so remappings are respected
 - **Precision mode** (hold R2, ¼ speed) and **turbo** (hold L2, ×2) for cursor and scrolling
-- **Every button is remappable** from a visual keybinds screen, and the binding is *recorded, not picked from a list*: click the action next to the drawing of *your* controller, take one of the three suggestions for that button, or hit **Record input** and press any key, key combination or mouse button — it gets copied verbatim. 12 buttons, plus each stick's movement (cursor, scroll or nothing) set separately from the stick click
+- **Every button is remappable** from a visual keybinds screen, and the binding is *recorded, not picked from a list*: click the action next to the drawing of *your* controller, take one of the three suggestions for that button, or hit **Record input** and press any key, key combination or mouse button — it gets copied verbatim. A button can also **open an app** — Steam, CrossOver, anything in Applications. 12 buttons, plus each stick's movement (cursor, scroll or nothing) set separately from the stick click
 - **Controller battery indicator** in the menu, macOS style
 - **Auto-pause in games**: when a game or a chosen app (GeForce Now and Steam are preloaded) is frontmost, CouchPilot steps aside and the controller belongs to the game
 - **Localized**: English, Italian, Spanish, Simplified Chinese — follows the system language by default
@@ -60,11 +60,11 @@ Written in Swift with **zero external dependencies** and **zero data collection*
 | R2 (hold) | Precision: ¼ speed |
 | L2 (hold) | Turbo: ×2 speed |
 | L3 / R3 | Configurable — defaults: Mute / Middle click |
-
-Every button in this table can be reassigned from **Keybinds** in the menu — except View + Menu, reserved for the on/off command.
 | View (⧉) alone | Show Desktop — remappable. Fires on release, so it doesn't go off when View is part of the on/off combo |
 | Menu (☰) alone | Opens the CouchPilot menu bar menu — fixed, not remappable |
 | View (⧉) + Menu (☰) together, 2 s | Switches CouchPilot on and off, both ways |
+
+Every button in this table can be reassigned from **Keybinds** in the menu — except Menu (☰) and the View + Menu combo, which are reserved.
 
 The app activates when a controller connects and deactivates when it disconnects (releasing any held button, so a drag never gets stuck).
 
@@ -77,7 +77,7 @@ The app activates when a controller connects and deactivates when it disconnects
 
 ### From a release
 
-1. Download `CouchPilot-1.0.0.dmg` from [Releases](../../releases), open it and drag **CouchPilot** onto the **Applications** shortcut.
+1. Download `CouchPilot-1.0.1.dmg` from [Releases](../../releases), open it and drag **CouchPilot** onto the **Applications** shortcut.
 
 2. **Open it once and let macOS refuse.** Double-click CouchPilot in Applications; a dialog says it can't be opened because Apple can't check it for malicious software. Click **Done** — this step is not optional, it is what makes the next one appear.
 
@@ -122,7 +122,7 @@ Requires the Xcode Command Line Tools (`xcode-select --install`). The script bui
 
 ## Settings
 
-Everything lives in the menu bar icon → **Settings**: cursor and scroll speed presets, stick deadzone, response curve, R2/L2 factors, L3/R3 actions, excluded apps, auto-pause in games, language, reset. Changes take effect immediately.
+Everything lives in the menu bar icon → **Settings**: cursor and scroll speed presets, stick deadzone, response curve, R2/L2 factors, excluded apps, auto-pause in games, language, reset. Changes take effect immediately. Button assignments have their own screen, **Keybinds**.
 
 Advanced values outside the presets can be set from the terminal (`UserDefaults` domain `com.hirpino.couchpilot`):
 
