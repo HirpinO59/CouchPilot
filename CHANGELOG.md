@@ -20,6 +20,7 @@ Everything in this release comes from what people asked for after 1.0.0.
 - ☰ pressed a second time now closes the menu instead of doing nothing. An open menu holds the main thread inside its own tracking loop, so the second synthetic click never arrived; the driver sends Esc instead, straight from its own queue
 - **Calibrate sticks** is gone from the menu. It sampled two seconds of stick rest position, which is not how drift actually behaves — it will come back when it works properly
 - Added `LICENSE` (source-available, not open source) and `SECURITY.md`
+- **Builds now carry an Apple-certified timestamp, and the disk image is signed too.** Without a timestamp a signature carries only the Mac's own clock, so once the signing certificate expires already-distributed copies risk failing to validate; signing the DMG means you can check the container before you even open it. `build.sh` refuses to call a build publishable if the timestamp service didn't answer
 - The connected pad's profile is now written to the log, so a report about the wrong diagram says at once whether the pad declared anything at all
 
 ## 1.0.0 — 2026-07-25

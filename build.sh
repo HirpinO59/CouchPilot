@@ -38,8 +38,16 @@ IDENTITY="${COUCHPILOT_SIGN_ID:-$(security find-identity -v -p codesigning 2>/de
     | awk -F'"' '/Apple Development|Developer ID Application/ {print $2; exit}')}"
 
 if [ -n "$IDENTITY" ]; then
-    codesign --force --options runtime --sign "$IDENTITY" "$APP"
-    echo "Firmato con: $IDENTITY"
+    # --timestamp mette in firma un orario certificato da Apple invece della sola
+    # ora del Mac: senza, quando il certificato di firma scade le copie già
+    # distribuite rischiano di non validare più. Se il servizio non risponde si
+    # firma comunque, ma lo si dice: una release va fatta con il timestamp.
+    if codesign --force --options runtime --timestamp --sign "$IDENTITY" "$APP" 2>/dev/null; then
+        echo "Firmato con: $IDENTITY (timestamp Apple)"
+    else
+        codesign --force --options runtime --sign "$IDENTITY" "$APP"
+        echo "Firmato con: $IDENTITY — ATTENZIONE: timestamp non ottenuto, non pubblicare questa build"
+    fi
 else
     codesign --force --sign - "$APP"
     echo "ATTENZIONE: firma ad-hoc — il permesso Accessibilità va ridato a ogni build."
@@ -57,6 +65,12 @@ if [ "${1:-}" = "dmg" ]; then
     rm -f "$DMG"
     hdiutil create -volname "CouchPilot" -srcfolder "$STAGE" -ov -format ULFO "$DMG" >/dev/null
     rm -rf "$STAGE"
+    # Firmato anche il contenitore: così si verifica che il disco scaricato sia
+    # quello uscito da qui, non solo l'app che sta dentro.
+    if [ -n "$IDENTITY" ]; then
+        codesign --force --timestamp --sign "$IDENTITY" "$DMG" 2>/dev/null \
+            && echo "DMG firmato" || echo "ATTENZIONE: DMG non firmato"
+    fi
     echo "Disco di installazione: $DMG ($(du -h "$DMG" | cut -f1))"
 fi
 
