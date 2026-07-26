@@ -16,6 +16,7 @@ final class ControllerMonitor {
         nc.addObserver(forName: .GCControllerDidDisconnect, object: nil, queue: .main) { [weak self] note in
             guard let self, let controller = note.object as? GCController, controller === self.current else { return }
             self.current = nil
+            Controllers.adopt(nil)
             NSLog("CouchPilot: controller disconnesso (%@)", controller.vendorName ?? "sconosciuto")
             self.onDisconnect?(controller)
             if let next = GCController.controllers().first(where: { $0.extendedGamepad != nil }) {
@@ -34,7 +35,9 @@ final class ControllerMonitor {
             return
         }
         current = controller
-        Log.write("controller connesso (\(controller.vendorName ?? "sconosciuto"))")
+        // Da qui in poi disegno e sigle seguono la famiglia del pad.
+        Controllers.adopt(controller)
+        Log.write("controller connesso (\(controller.vendorName ?? "sconosciuto")), \(Controllers.describe(controller))")
         onConnect?(controller)
     }
 }

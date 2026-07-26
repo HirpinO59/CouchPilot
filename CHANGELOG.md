@@ -1,11 +1,24 @@
 # Changelog
 
-## 1.0.1 — 2026-07-26
+## 1.1.0 — 2026-07-26
 
+Everything in this release comes from what people asked for after 1.0.0.
+
+### Buttons are called by the names printed on *your* pad
+
+- **The controller is now recognised by the profile it declares to macOS, not by its name.** The old check treated any pad whose name contained "Wireless Controller" as a PlayStation pad — which is right for a DualShock 4, and wrong for every third-party pad with a longer name. Those pads were shown a DualSense with ✕ ◯ ▢ △ on buttons labelled A B X Y
+- **Triggers are named after the pad**: LT/RT on Xbox and 8BitDo, L2/R2 on PlayStation. They appear in the keybinds header and in Settings, where the two items now read *RT precision* / *LT boost* and follow the pad as it changes
+- **8BitDo pads are recognised as their own family**: Xbox-style letters, and the two centre buttons called − and + as they are on the pad. They currently borrow the Xbox diagram — a drawing of their own is coming
+
+### Other changes
+
+- **Check for updates** in the menu, showing the installed version. It opens the releases page in your browser: the app still makes no network calls of its own
+- **Keybinds opens as its own window**, no longer as the third page of the quick guide — no step dots, no *Next*, just the screen and a *Close* button
 - **A button can now open an app.** In the keybinds screen, each button's menu has *Open an app…* — pick Steam, CrossOver, anything in Applications, and that button launches it (or brings it to the front if it's already running). Asked for on the first day by r/macgaming
 - ☰ pressed a second time now closes the menu instead of doing nothing. An open menu holds the main thread inside its own tracking loop, so the second synthetic click never arrived; the driver sends Esc instead, straight from its own queue
 - **Calibrate sticks** is gone from the menu. It sampled two seconds of stick rest position, which is not how drift actually behaves — it will come back when it works properly
 - Added `LICENSE` (source-available, not open source) and `SECURITY.md`
+- The connected pad's profile is now written to the log, so a report about the wrong diagram says at once whether the pad declared anything at all
 
 ## 1.0.0 — 2026-07-25
 

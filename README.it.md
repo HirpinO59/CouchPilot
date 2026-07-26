@@ -8,7 +8,7 @@ App macOS in menu bar: colleghi un controller — Xbox, DualSense o qualunque pa
   <img src="docs/images/demo.gif" width="640" alt="YouTube, Mission Control e cambio app col controller">
 </p>
 
-**Versione 1.0.1.** Questo è il documento tecnico completo; il [README inglese](README.md) è la vetrina per gli utenti.
+**Versione 1.1.0.** Questo è il documento tecnico completo; il [README inglese](README.md) è la vetrina per gli utenti.
 
 ## Build e avvio
 
@@ -55,8 +55,8 @@ Per togliere del tutto l'avviso servono tre cose: iscrizione all'**Apple Develop
 | D-pad sx/dx | Traccia precedente / successiva — configurabile |
 | LB / RB | Space precedente / successivo |
 | View (⧉) da solo | Mostra Scrivania — configurabile. Scatta al rilascio, così non parte quando View serve al comando di accensione |
-| R2 (tenuto) | Precisione: cursore e scroll a ¼ della velocità |
-| L2 (tenuto) | Turbo: velocità ×2 |
+| RT / R2 (tenuto) | Precisione: cursore e scroll a ¼ della velocità |
+| LT / L2 (tenuto) | Turbo: velocità ×2 |
 | L3 (pressione stick sx) | Configurabile — default: Mute |
 | R3 (pressione stick dx) | Configurabile — default: Click centrale |
 
@@ -75,10 +75,10 @@ In cima al menu c'è il controller collegato con un **indicatore di batteria in 
 Da dove arriva il dato: `GCController.battery` è la via ufficiale e funziona su DualSense e simili, ma **sui pad Xbox via Bluetooth riporta livello 0 e stato sconosciuto** (verificato su macOS 26). Il livello reale sta nello stack Bluetooth e si legge con `system_profiler SPBluetoothDataType -json` (~0,2 s), eseguito fuori dal thread principale. L'app prova prima la via ufficiale e ripiega sulla seconda.
 
 - **Attivo** — toggle on/off (equivale a View + Menu tenuti insieme 2 secondi)
-- **Assegnazione tasti** — schermata con il disegno del pad collegato e, per ogni comando, il valore assegnato: si clicca il valore, si prende uno dei tre suggerimenti, si registra un input nuovo o si sceglie un'applicazione da aprire, diventa giallo e si salva. In alto il titolo e l'intestazione coi comandi fissi (R2 precisione, L2 turbo, accensione), coi nomi veri dei tasti del pad collegato: View/Menu su Xbox, Create/Options su DualSense. Tutti i tasti sono riassegnabili tranne i due centrali, riservati al comando di accensione. Ci sono anche i due stick, con la pressione (L3/R3) e il **movimento** separati: il movimento sceglie fra cursore, scorrimento e niente. **View** (Create sul DualSense) ha la didascalia sopra il disegno, con la linea che sale dritta: sta al centro del pad e non appartiene a nessuna delle due colonne
+- **Assegnazione tasti** — schermata con il disegno del pad collegato e, per ogni comando, il valore assegnato: si clicca il valore, si prende uno dei tre suggerimenti, si registra un input nuovo o si sceglie un'applicazione da aprire, diventa giallo e si salva. In alto il titolo e l'intestazione coi comandi fissi (precisione e turbo sui grilletti, accensione), coi nomi veri dei tasti del pad collegato: LT/RT e View/Menu su Xbox, L2/R2 e Create/Options su DualSense, LT/RT e − / + sui pad 8BitDo. Tutti i tasti sono riassegnabili tranne i due centrali, riservati al comando di accensione. Ci sono anche i due stick, con la pressione (L3/R3) e il **movimento** separati: il movimento sceglie fra cursore, scorrimento e niente. **View** (Create sul DualSense) ha la didascalia sopra il disegno, con la linea che sale dritta: sta al centro del pad e non appartiene a nessuna delle due colonne
 - **Guida rapida** — tre schede, mostrate una sola volta al primo avvio e richiamabili da qui, con Indietro/Avanti in basso. La prima presenta l'app con i pulsanti Invia feedback e Buy Me a Coffee (Ko-fi), e — **solo se il permesso Accessibilità manca** — lo spiega con un pulsante che apre il pannello giusto; appena il permesso arriva la scheda diventa da sola una conferma (`PermissionsGate.granted`, agganciata al polling che l'app fa già ogni 2 s). A chi l'ha già concesso l'istruzione non viene mostrata, e c'è la spunta per l'avvio al login. **La seconda è solo la dimostrazione**: nessun titolo, nessuna scritta, un filmato in riproduzione continua, muto e senza comandi (`Resources/welcome2.mp4`, 1280×720, 30 fps, ~2 Mbps — un video e non una GIF: a parità di peso ha il triplo dei pixel e il triplo dei fotogrammi). La terza è l'assegnazione tasti
 - **Impostazioni** — tutta la configurazione in un posto solo, effetto immediato:
-  - parametri a preset: velocità cursore e scroll, deadzone, curva di risposta, fattori R2/L2 (le stesse chiavi restano regolabili a valori arbitrari via `defaults write`, tabella sotto);
+  - parametri a preset: velocità cursore e scroll, deadzone, curva di risposta, fattori dei grilletti (le stesse chiavi restano regolabili a valori arbitrari via `defaults write`, tabella sotto);
   - **Disattiva nelle app** — elenco di app con cui l'app si mette in pausa da sola quando sono in primo piano (precaricate: GeForce Now e Steam). "Aggiungi app…" apre un selettore sulla cartella Applicazioni (si possono scegliere più app insieme); per togliere un'esclusione, clicca il suo nome nell'elenco. In pausa il pad resta tutto al gioco, ☰ compreso;
   - **Pausa automatica nei giochi** — pausa su qualsiasi app che si dichiara "gioco" nell'Info.plist (`LSApplicationCategoryType`): lo stesso criterio con cui macOS attiva la modalità gioco, ma vale anche in finestra. I giochi che non si dichiarano si aggiungono a mano con "Disattiva nelle app";
   - **Lingua** — italiano, inglese, spagnolo, cinese semplificato, o **Automatica** (segue la lingua di sistema; se non è tra quelle tradotte, inglese). Il menu si ricostruisce all'istante, senza riavviare;
@@ -105,8 +105,8 @@ defaults write com.hirpino.couchpilot maxSpeed -float 1400
 | `debugLog` | false | Logga valori stick e posizione ogni 0.5s (visibili in Console.app, processo CouchPilot) |
 | `excludedApps` | GeForce Now, Steam | Bundle id delle app che mettono in pausa il controllo (gestibili dal menu) |
 | `autoPauseGames` | true | Pausa automatica quando l'app in primo piano è categorizzata come gioco |
-| `precisionFactor` | 0.25 | Moltiplicatore velocità con R2 tenuto |
-| `boostFactor` | 2.0 | Moltiplicatore velocità con L2 tenuto |
+| `precisionFactor` | 0.25 | Moltiplicatore velocità col grilletto destro tenuto |
+| `boostFactor` | 2.0 | Moltiplicatore velocità col grilletto sinistro tenuto |
 | `actionL3` / `actionR3` | mute / middleClick | Azione dei pulsanti stick (gestibili dal menu) |
 | `language` | auto | Lingua del menu: `auto`, `it`, `en`, `es`, `zh` |
 
@@ -129,9 +129,9 @@ defaults write com.hirpino.couchpilot maxSpeed -float 1400
 - [ ] B apre e chiude Mission Control
 - [ ] LB/RB si spostano tra gli Spaces (servono ≥2 scrivanie)
 - [ ] View da solo mostra la Scrivania e la ripristina; View+Menu **non** la mostra
-- [ ] R2 tenuto: il cursore rallenta visibilmente; rilasciato torna normale
-- [ ] L2 tenuto: il cursore accelera; L2+R2 insieme ≈ metà velocità
-- [ ] R2 + stick destro: scroll lento e controllato
+- [ ] grilletto destro tenuto: il cursore rallenta visibilmente; rilasciato torna normale
+- [ ] grilletto sinistro tenuto: il cursore accelera; i due insieme ≈ metà velocità
+- [ ] grilletto destro + stick destro: scroll lento e controllato
 
 ## Note
 

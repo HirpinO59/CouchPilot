@@ -1,21 +1,95 @@
 import CoreGraphics
 import GameController
 
-// Riconoscimento del pad dal nome che dichiara.
-enum Controllers {
-    static func isPlayStation(_ name: String?) -> Bool {
-        let name = (name ?? "").lowercased()
-        // "Wireless Controller" da solo è il DualShock 4, ma compare anche in
-        // "Xbox Wireless Controller": se c'è scritto Xbox non si discute.
-        guard !name.contains("xbox") else { return false }
-        return ["dualsense", "dualshock", "wireless controller", "playstation"]
-            .contains { name.contains($0) }
+// Le famiglie di pad che l'app sa nominare. Non è una tassonomia dei pad in
+// commercio: è l'insieme delle sigle stampate sui tasti, che è la sola cosa che
+// serve per non dire all'utente "premi R2" mentre lui legge "RT".
+enum PadFamily {
+    case xbox, playStation, eightBitDo
+
+    // I due tasti piccoli al centro, coi nomi ufficiali di ciascun pad.
+    var toggleNames: (left: String, right: String) {
+        switch self {
+        case .xbox:        return ("View", "Menu")
+        case .playStation: return ("Create", "Options")
+        case .eightBitDo:  return ("−", "+")
+        }
     }
 
-    // I due tasti piccoli al centro, coi nomi ufficiali di ciascun pad:
-    // View/Menu su Xbox, Create/Options su DualSense.
-    static func toggleNames(playStation: Bool) -> (left: String, right: String) {
-        playStation ? ("Create", "Options") : ("View", "Menu")
+    // I grilletti: non si riassegnano (precisione e turbo), ma vanno chiamati
+    // col nome che l'utente si trova stampato sul pad.
+    var triggerNames: (left: String, right: String) {
+        self == .playStation ? ("L2", "R2") : ("LT", "RT")
+    }
+}
+
+// Riconoscimento del pad: prima dal profilo che dichiara al sistema, che è
+// l'unica informazione certa; il nome resta un ripiego per i pad che non si
+// dichiarano né Xbox né PlayStation.
+enum Controllers {
+    // Famiglia rilevata dal profilo del pad collegato. nil = nessun pad, o pad
+    // che non rientra in nessuna delle famiglie che il profilo sa distinguere.
+    private static var detected: PadFamily?
+
+    // Chiamata quando un pad viene adottato o lasciato: da qui in poi le sigle
+    // seguono il profilo, non il nome.
+    static func adopt(_ controller: GCController?) {
+        guard let controller, let pad = controller.extendedGamepad else {
+            detected = nil
+            return
+        }
+        if pad is GCDualSenseGamepad || pad is GCDualShockGamepad {
+            detected = .playStation
+        } else if named8BitDo(controller.vendorName) {
+            // Anche col profilo Xbox (i loro pad lo espongono spesso) le sigle
+            // stampate restano le loro: i tasti centrali sono − e +.
+            detected = .eightBitDo
+        } else if pad is GCXboxGamepad {
+            detected = .xbox
+        } else {
+            detected = nil
+        }
+    }
+
+    static func family(_ name: String?) -> PadFamily {
+        detected ?? familyFromName(name)
+    }
+
+    static func isPlayStation(_ name: String?) -> Bool {
+        family(name) == .playStation
+    }
+
+    // Che profilo espone il pad e che famiglia gli abbiamo assegnato. Finisce
+    // nel log: quando qualcuno segnala che vede il pad sbagliato, questa riga
+    // dice subito se il profilo era generico e abbiamo tirato a indovinare.
+    static func describe(_ controller: GCController) -> String {
+        let profile: String
+        switch controller.extendedGamepad {
+        case is GCDualSenseGamepad: profile = "DualSense"
+        case is GCDualShockGamepad: profile = "DualShock"
+        case is GCXboxGamepad:      profile = "Xbox"
+        default:                    profile = "generico"
+        }
+        return "profilo \(profile) → sigle \(family(controller.vendorName))"
+    }
+
+    // Ripiego sul nome, per i pad che espongono un profilo esteso generico.
+    // Deve restare avaro: sbagliare qui vuol dire chiamare i tasti col nome
+    // che non hanno.
+    private static func familyFromName(_ name: String?) -> PadFamily {
+        let name = (name ?? "").lowercased().trimmingCharacters(in: .whitespaces)
+        if named8BitDo(name) { return .eightBitDo }
+        guard !name.contains("xbox") else { return .xbox }
+        // "Wireless Controller" da solo è il DualShock 4. Dentro un nome più
+        // lungo (8BitDo Ultimate Wireless Controller e simili) non dice niente:
+        // vale solo se il pad non ha altro da dire su di sé.
+        if name == "wireless controller" { return .playStation }
+        let playStation = ["dualsense", "dualshock", "playstation"]
+        return playStation.contains { name.contains($0) } ? .playStation : .xbox
+    }
+
+    private static func named8BitDo(_ name: String?) -> Bool {
+        (name ?? "").lowercased().contains("8bitdo")
     }
 }
 
@@ -44,24 +118,32 @@ struct PadControl {
     let kind: Kind
     let xboxName: String
     let psName: String
+    // Sigla sui pad 8BitDo, solo dove è diversa da quella Xbox: lettere,
+    // dorsali e direzionale hanno gli stessi nomi, i due centrali no.
+    let altName: String?
     let defaultBinding: Binding
     let defaultRole: StickRole
     let side: Side
     let xbox: CGPoint
     let dualSense: CGPoint
+    // Aggancio sul disegno 8BitDo: manca finché il disegno non c'è, e finché
+    // manca si mostra il pad Xbox coi suoi agganci.
+    let eightBitDo: CGPoint?
 
     init(id: String, kind: Kind = .button, xboxName: String, psName: String,
-         binding: Binding = .none, role: StickRole = .off, side: Side,
-         xbox: CGPoint, dualSense: CGPoint) {
+         altName: String? = nil, binding: Binding = .none, role: StickRole = .off,
+         side: Side, xbox: CGPoint, dualSense: CGPoint, eightBitDo: CGPoint? = nil) {
         self.id = id
         self.kind = kind
         self.xboxName = xboxName
         self.psName = psName
+        self.altName = altName
         self.defaultBinding = binding
         self.defaultRole = role
         self.side = side
         self.xbox = xbox
         self.dualSense = dualSense
+        self.eightBitDo = eightBitDo
     }
 
     // View è anche metà del comando di accensione: la sua azione si decide al
@@ -87,11 +169,26 @@ struct PadControl {
         }
     }
 
-    func anchor(playStation: Bool) -> CGPoint { playStation ? dualSense : xbox }
+    // L'aggancio segue il disegno che si sta mostrando, non la famiglia del pad:
+    // se il pad non ha un disegno suo si vede l'Xbox, e le didascalie devono
+    // puntare ai tasti di quello.
+    func anchor(on art: PadFamily) -> CGPoint {
+        switch art {
+        case .playStation: return dualSense
+        case .eightBitDo:  return eightBitDo ?? xbox
+        case .xbox:        return xbox
+        }
+    }
 
-    // Gli stick portano una chiave di traduzione al posto della sigla del tasto.
-    func name(playStation: Bool) -> String {
-        let raw = playStation ? psName : xboxName
+    // La sigla invece segue il pad vero: è quella che l'utente legge sui tasti.
+    // Gli stick portano una chiave di traduzione al posto della sigla.
+    func name(for family: PadFamily) -> String {
+        let raw: String
+        switch family {
+        case .playStation: raw = psName
+        case .eightBitDo:  raw = altName ?? xboxName
+        case .xbox:        raw = xboxName
+        }
         return kind == .stickMove ? L.t(raw) : raw
     }
 
@@ -153,7 +250,7 @@ struct PadControl {
                    role: .scroll, side: .right,
                    xbox: CGPoint(x: 0.17, y: -0.42), dualSense: CGPoint(x: 0.20, y: -0.05)),
         // --- al centro, didascalia sopra il disegno ---
-        PadControl(id: "View", xboxName: "View", psName: "Create",
+        PadControl(id: "View", xboxName: "View", psName: "Create", altName: "−",
                    binding: .system(.showDesktop), side: .above,
                    xbox: CGPoint(x: -0.14, y: 0.14), dualSense: CGPoint(x: -0.52, y: 0.82)),
     ]

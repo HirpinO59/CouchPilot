@@ -31,6 +31,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let languageMenu = NSMenu()
     private var rootMenu: NSMenu?
     private var presetSubmenus: [(menu: NSMenu, key: String)] = []
+    // Le due voci che citano un grilletto nel titolo: la sigla cambia col pad
+    // collegato, quindi vanno riscritte quando il pad cambia.
+    private var triggerTitleItems: [(item: NSMenuItem, key: String)] = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         Settings.register()
@@ -291,6 +294,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         guideItem.target = self
         menu.addItem(guideItem)
 
+        // La versione installata sta nel titolo: la pagina che si apre mostra
+        // l'ultima, e il confronto si fa a occhio senza chiedere niente alla rete.
+        if Feedback.hasIssues {
+            let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
+            let updatesItem = NSMenuItem(title: L.t("menu.updates", version),
+                                         action: #selector(openReleases), keyEquivalent: "")
+            updatesItem.target = self
+            menu.addItem(updatesItem)
+        }
+
         if let feedbackItem = buildFeedbackItem() { menu.addItem(feedbackItem) }
 
         menu.addItem(.separator())
@@ -332,6 +345,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         settingsMenu.autoenablesItems = false
 
         presetSubmenus.removeAll()
+        triggerTitleItems.removeAll()
         let presets: [(String, String, [(String, Double)])] = [
             ("set.cursorSpeed", "maxSpeed",
              [("val.slow", 800), ("val.normal", 1400), ("val.fast", 2000), ("val.turbo", 2800)]),
@@ -357,9 +371,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 submenu.addItem(item)
             }
             presetSubmenus.append((submenu, key))
-            let holder = NSMenuItem(title: L.t(titleKey), action: nil, keyEquivalent: "")
+            let holder = NSMenuItem(title: presetTitle(titleKey), action: nil, keyEquivalent: "")
             holder.submenu = submenu
             settingsMenu.addItem(holder)
+            if titleKey == "set.precision" || titleKey == "set.boost" {
+                triggerTitleItems.append((holder, titleKey))
+            }
         }
 
         settingsMenu.addItem(.separator())
@@ -403,6 +420,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         return settingsItem
     }
 
+    // Precisione e turbo stanno sui grilletti: la voce li chiama col nome che
+    // l'utente si trova stampato sul pad, LT/RT o L2/R2.
+    private func presetTitle(_ key: String) -> String {
+        let triggers = Controllers.family(controllerName).triggerNames
+        switch key {
+        case "set.precision": return L.t(key, triggers.right)
+        case "set.boost":     return L.t(key, triggers.left)
+        default:              return L.t(key)
+        }
+    }
+
     private func refreshUI() {
         let symbol: String
         if !trusted {
@@ -427,6 +455,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         enabledItem.state = enabled ? .on : .off
         gamesPauseItem.state = UserDefaults.standard.bool(forKey: "autoPauseGames") ? .on : .off
+        for (item, key) in triggerTitleItems { item.title = presetTitle(key) }
         axItem.isHidden = trusted
         loginItem.state = SMAppService.mainApp.status == .enabled ? .on : .off
     }
@@ -501,6 +530,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func openWelcome() {
         WelcomeWindow.show(controller: controllerName)
+    }
+
+    @objc private func openReleases() {
+        Feedback.openReleases()
     }
 
     @objc private func openIssues() {

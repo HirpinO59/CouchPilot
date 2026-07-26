@@ -64,6 +64,15 @@ enum Feedback {
         NSWorkspace.shared.open(url)
     }
 
+    // Apre la pagina delle versioni nel browser. L'app non chiede niente alla
+    // rete da sé: nessun controllo in background, nessuna chiamata all'avvio.
+    // Il confronto lo fa l'utente, che sulla pagina vede l'ultima versione e qui
+    // sotto, nel menu, la propria.
+    static func openReleases() {
+        guard hasIssues, let url = URL(string: repository + "/releases/latest") else { return }
+        NSWorkspace.shared.open(url)
+    }
+
     // Apre il client di posta con una bozza già compilata. L'utente la vede e la
     // modifica prima di inviare: nulla parte a sua insaputa.
     static func composeEmail(controller: String?) {

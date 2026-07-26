@@ -42,6 +42,12 @@ enum L {
         String(format: t(key), argument)
     }
 
+    // Per i testi che citano più sigle del pad: gli indici posizionali (%1$@,
+    // %2$@…) tengono l'ordine anche dove la traduzione lo cambia.
+    static func t(_ key: String, _ arguments: [String]) -> String {
+        String(format: t(key), arguments: arguments)
+    }
+
     // Ogni voce con le sue quattro traduzioni affiancate: si rivedono a colpo
     // d'occhio e non si perde il filo tra un blocco e l'altro.
     private static let table: [String: [String: String]] = [
@@ -70,9 +76,10 @@ enum L {
                          "es": "Zona muerta del stick", "zh": "摇杆死区"],
         "set.curve": ["it": "Curva di risposta", "en": "Response curve",
                       "es": "Curva de respuesta", "zh": "响应曲线"],
-        "set.precision": ["it": "Precisione R2", "en": "R2 precision",
-                          "es": "Precisión R2", "zh": "R2 精确模式"],
-        "set.boost": ["it": "Turbo L2", "en": "L2 boost", "es": "Turbo L2", "zh": "L2 加速"],
+        // %@ è il grilletto del pad collegato: RT/LT su Xbox, R2/L2 su PlayStation.
+        "set.precision": ["it": "Precisione %@", "en": "%@ precision",
+                          "es": "Precisión %@", "zh": "%@ 精确模式"],
+        "set.boost": ["it": "Turbo %@", "en": "%@ boost", "es": "Turbo %@", "zh": "%@ 加速"],
 
         "val.slow": ["it": "Lenta", "en": "Slow", "es": "Lenta", "zh": "慢"],
         "val.normal": ["it": "Normale", "en": "Normal", "es": "Normal", "zh": "正常"],
@@ -114,8 +121,12 @@ enum L {
                       "es": "Salir de CouchPilot", "zh": "退出 CouchPilot"],
         "menu.keybinds": ["it": "Assegnazione tasti", "en": "Keybinds",
                           "es": "Asignación de botones", "zh": "按键设置"],
+        // %@ è la versione installata: la pagina che si apre mostra l'ultima.
+        "menu.updates": ["it": "Controlla aggiornamenti (%@)", "en": "Check for updates (%@)",
+                         "es": "Buscar actualizaciones (%@)", "zh": "检查更新 (%@)"],
         "keybinds.save": ["it": "Salva", "en": "Save", "es": "Guardar", "zh": "保存"],
         "keybinds.reset": ["it": "Ripristina", "en": "Reset", "es": "Restablecer", "zh": "恢复默认"],
+        "keybinds.close": ["it": "Chiudi", "en": "Close", "es": "Cerrar", "zh": "关闭"],
         "pad.leftStick": ["it": "Analogico SX · movimento", "en": "Left stick · movement",
                           "es": "Stick izquierdo · movimiento", "zh": "左摇杆 · 移动"],
         "pad.rightStick": ["it": "Analogico DX · movimento", "en": "Right stick · movement",
@@ -146,12 +157,13 @@ enum L {
                          "es": "esc cancela · ⌫ deja el botón sin acción",
                          "zh": "esc 取消 · ⌫ 清除该按键"],
         // Intestazione dell'assegnazione tasti: i comandi che non si cambiano.
-        // %1$@ e %2$@ sono i nomi dei due tasti centrali del pad collegato
-        // (View/Menu su Xbox, Create/Options su DualSense).
-        "config.header": ["it": "R2 tenuto — precisione: cursore e scorrimento rallentano  ·  L2 tenuto — turbo: velocità doppia\n%2$@ da solo — apre il menu di CouchPilot  ·  %1$@ + %2$@ tenuti 2 secondi — attivazione/disattivazione",
-                          "en": "Hold R2 — precision: cursor and scrolling slow down  ·  Hold L2 — turbo: double speed\n%2$@ alone — opens the CouchPilot menu  ·  %1$@ + %2$@ held 2 seconds — on/off",
-                          "es": "R2 mantenido — precisión: cursor y desplazamiento más lentos  ·  L2 mantenido — turbo: velocidad doble\n%2$@ solo — abre el menú de CouchPilot  ·  %1$@ + %2$@ mantenidos 2 segundos — activación/desactivación",
-                          "zh": "按住 R2——精确：光标和滚动变慢  ·  按住 L2——加速：速度翻倍\n单独按 %2$@——打开 CouchPilot 菜单  ·  按住 %1$@ + %2$@ 2 秒——启用/停用"],
+        // Tutte le sigle vengono dal pad collegato: %1$@ e %2$@ sono i due tasti
+        // centrali (View/Menu su Xbox, Create/Options su DualSense), %3$@ e %4$@
+        // i grilletti sinistro e destro (LT/RT su Xbox, L2/R2 su PlayStation).
+        "config.header": ["it": "%4$@ tenuto — precisione: cursore e scorrimento rallentano  ·  %3$@ tenuto — turbo: velocità doppia\n%2$@ da solo — apre il menu di CouchPilot  ·  %1$@ e %2$@ tenuti 2 secondi — attivazione/disattivazione",
+                          "en": "Hold %4$@ — precision: cursor and scrolling slow down  ·  Hold %3$@ — turbo: double speed\n%2$@ alone — opens the CouchPilot menu  ·  %1$@ and %2$@ held 2 seconds — on/off",
+                          "es": "%4$@ mantenido — precisión: cursor y desplazamiento más lentos  ·  %3$@ mantenido — turbo: velocidad doble\n%2$@ solo — abre el menú de CouchPilot  ·  %1$@ y %2$@ mantenidos 2 segundos — activación/desactivación",
+                          "zh": "按住 %4$@——精确：光标和滚动变慢  ·  按住 %3$@——加速：速度翻倍\n单独按 %2$@——打开 CouchPilot 菜单  ·  按住 %1$@ 和 %2$@ 2 秒——启用/停用"],
         "action.leftClick": ["it": "Click sinistro", "en": "Left click",
                              "es": "Clic izquierdo", "zh": "左键点击"],
         "action.rightClick": ["it": "Click destro", "en": "Right click",
@@ -172,10 +184,10 @@ enum L {
                             "en": "Welcome to CouchPilot",
                             "es": "Bienvenido a CouchPilot",
                             "zh": "欢迎使用 CouchPilot"],
-        "welcome.1.body": ["it": "CouchPilot trasforma il controller in un telecomando per il Mac: cursore, click, scorrimento, volume e media senza alzarti dal divano.\n\nIl feedback è la cosa più importante: se qualcosa non va o vuoi una funzione nuova, chiedila senza esitare dal pulsante qui sotto.\n\nIn arrivo con la 1.1 — i profili: impostazioni e tasti diversi per ogni app.\n\n— HirpinO",
-                           "en": "CouchPilot turns your controller into a remote for your Mac: cursor, clicks, scrolling, volume and media without leaving the couch.\n\nFeedback is what matters most: if something's off or you want a new feature, don't hesitate — ask with the button below.\n\nComing in 1.1 — profiles: different settings and bindings for each app.\n\n— HirpinO",
-                           "es": "CouchPilot convierte tu mando en un control remoto para el Mac: cursor, clics, desplazamiento, volumen y multimedia sin levantarte del sofá.\n\nLo más importante es tu opinión: si algo falla o quieres una función nueva, pídela sin dudar con el botón de abajo.\n\nPróximamente en la 1.1 — perfiles: ajustes y botones distintos para cada app.\n\n— HirpinO",
-                           "zh": "CouchPilot 把你的手柄变成 Mac 的遥控器：光标、点击、滚动、音量和媒体控制，不用离开沙发。\n\n反馈是最重要的：如果有问题或想要新功能，请随时用下方按钮告诉我。\n\n1.1 版即将推出——配置文件：为每个 App 设置不同的按键和参数。\n\n— HirpinO"],
+        "welcome.1.body": ["it": "CouchPilot trasforma il controller in un telecomando per il Mac: cursore, click, scorrimento, volume e media senza alzarti dal divano.\n\nIl feedback è la cosa più importante: se qualcosa non va o vuoi una funzione nuova, chiedila senza esitare dal pulsante qui sotto.\n\nIn arrivo con la 1.2 — i profili: impostazioni e tasti diversi per ogni app.\n\n— HirpinO",
+                           "en": "CouchPilot turns your controller into a remote for your Mac: cursor, clicks, scrolling, volume and media without leaving the couch.\n\nFeedback is what matters most: if something's off or you want a new feature, don't hesitate — ask with the button below.\n\nComing in 1.2 — profiles: different settings and bindings for each app.\n\n— HirpinO",
+                           "es": "CouchPilot convierte tu mando en un control remoto para el Mac: cursor, clics, desplazamiento, volumen y multimedia sin levantarte del sofá.\n\nLo más importante es tu opinión: si algo falla o quieres una función nueva, pídela sin dudar con el botón de abajo.\n\nPróximamente en la 1.2 — perfiles: ajustes y botones distintos para cada app.\n\n— HirpinO",
+                           "zh": "CouchPilot 把你的手柄变成 Mac 的遥控器：光标、点击、滚动、音量和媒体控制，不用离开沙发。\n\n反馈是最重要的：如果有问题或想要新功能，请随时用下方按钮告诉我。\n\n1.2 版即将推出——配置文件：为每个 App 设置不同的按键和参数。\n\n— HirpinO"],
 
         "welcome.3.title": ["it": "Assegnazione tasti",
                             "en": "Keybinds",

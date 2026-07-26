@@ -21,6 +21,10 @@ final class WelcomeWindow: NSWindowController {
         Slide(titleKey: "welcome.3.title", bodyKey: "config.header", isConfig: true),
     ]
     private var index = 0
+    // Assegnazione tasti aperta dal menu: è la stessa scheda, ma da sola non è
+    // una guida. Senza puntini né "Avanti" non sembra il terzo passo di un
+    // percorso, che era il malinteso di chi la apriva dal menu.
+    private var keybindsOnly = false
     private static var controllerName: String?
 
     private let titleLabel = NSTextField(labelWithString: "")
@@ -50,6 +54,7 @@ final class WelcomeWindow: NSWindowController {
         if shared == nil { shared = WelcomeWindow() }
         guard let window = shared else { return }
         window.configView.update(controller: controllerName)
+        window.keybindsOnly = atConfig
         window.index = atConfig ? window.slides.count - 1 : 0
         window.render()
         NSApp.activate(ignoringOtherApps: true)
@@ -241,13 +246,17 @@ final class WelcomeWindow: NSWindowController {
 
     private func render() {
         let slide = slides[index]
-        let playStation = Controllers.isPlayStation(Self.controllerName)
-        let names = Controllers.toggleNames(playStation: playStation)
+        let family = Controllers.family(Self.controllerName)
+        let toggles = family.toggleNames
+        let triggers = family.triggerNames
 
-        // i testi citano i due tasti del comando di accensione coi nomi veri
-        // del pad collegato: View/Menu su Xbox, Create/Options su DualSense
+        // i testi citano i tasti coi nomi veri del pad collegato: View/Menu su
+        // Xbox, Create/Options su DualSense, − e + sui pad 8BitDo, e i grilletti
+        // LT/RT o L2/R2 a seconda di chi l'ha fatto
         titleLabel.stringValue = slide.titleKey.map(L.t) ?? ""
-        bodyLabel.stringValue = slide.bodyKey.map { String(format: L.t($0), names.left, names.right) } ?? ""
+        bodyLabel.stringValue = slide.bodyKey.map {
+            L.t($0, [toggles.left, toggles.right, triggers.left, triggers.right])
+        } ?? ""
         titleLabel.isHidden = slide.titleKey == nil
         bodyLabel.isHidden = slide.bodyKey == nil
 
@@ -286,12 +295,16 @@ final class WelcomeWindow: NSWindowController {
         loginCheckbox.state = LoginItem.isEnabled ? .on : .off
         resetButton.isHidden = !slide.isConfig
         saveButton.isHidden = !slide.isConfig
-        backButton.isHidden = index == 0
+        // Aperta da sola non è un percorso: niente passo indietro, niente
+        // puntini, e il pulsante di destra chiude invece di "andare avanti".
+        backButton.isHidden = keybindsOnly || index == 0
+        dots.isHidden = keybindsOnly
 
         backButton.title = L.t("welcome.back")
         resetButton.title = L.t("keybinds.reset")
         saveButton.title = L.t("keybinds.save")
-        nextButton.title = index == slides.count - 1 ? L.t("welcome.done") : L.t("welcome.next")
+        nextButton.title = keybindsOnly ? L.t("keybinds.close")
+            : (index == slides.count - 1 ? L.t("welcome.done") : L.t("welcome.next"))
         feedbackButton.title = L.t("welcome.feedback")
         coffeeButton.title = L.t("welcome.coffee")
 

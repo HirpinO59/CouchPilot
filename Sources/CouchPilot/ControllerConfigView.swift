@@ -110,15 +110,40 @@ final class ControllerConfigView: NSView {
 
     // MARK: - Disegno
 
-    private var isPlayStation: Bool { Controllers.isPlayStation(controllerName) }
+    // La famiglia del pad collegato: decide le sigle dei tasti.
+    private var family: PadFamily { Controllers.family(controllerName) }
+
+    // Il disegno da mostrare, che non sempre è quello della famiglia: un pad
+    // senza disegno proprio prende l'Xbox, il ripiego più vicino. Il disegno
+    // entra in gioco solo se ci sono sia l'immagine sia gli agganci ritarati:
+    // metà lavoro darebbe didascalie appese nel vuoto.
+    private var artFamily: PadFamily {
+        switch family {
+        case .playStation:
+            return .playStation
+        case .eightBitDo:
+            let ready = image(named: "controller-8bitdo") != nil
+                && PadControl.all.allSatisfy { $0.eightBitDo != nil }
+            return ready ? .eightBitDo : .xbox
+        case .xbox:
+            return .xbox
+        }
+    }
 
     private func artwork() -> NSImage? {
-        let name = isPlayStation ? "controller-dualsense" : "controller"
-        for candidate in [name, "controller"] {
-            for ext in ["pdf", "png"] {
-                if let url = Bundle.main.url(forResource: candidate, withExtension: ext),
-                   let image = NSImage(contentsOf: url) { return image }
-            }
+        let name: String
+        switch artFamily {
+        case .playStation: name = "controller-dualsense"
+        case .eightBitDo:  name = "controller-8bitdo"
+        case .xbox:        name = "controller"
+        }
+        return image(named: name) ?? image(named: "controller")
+    }
+
+    private func image(named name: String) -> NSImage? {
+        for ext in ["pdf", "png"] {
+            if let url = Bundle.main.url(forResource: name, withExtension: ext),
+               let image = NSImage(contentsOf: url) { return image }
         }
         return nil
     }
@@ -157,13 +182,13 @@ final class ControllerConfigView: NSView {
     private func controls(_ side: PadControl.Side) -> [PadControl] {
         PadControl.all
             .filter { $0.side == side }
-            .sorted { $0.anchor(playStation: isPlayStation).y > $1.anchor(playStation: isPlayStation).y }
+            .sorted { $0.anchor(on: artFamily).y > $1.anchor(on: artFamily).y }
     }
 
     private func columnWidth(_ side: PadControl.Side) -> CGFloat {
         var width: CGFloat = 0
         for control in controls(side) {
-            let name = control.name(playStation: isPlayStation) as NSString
+            let name = control.name(for: family) as NSString
             let value = valueText(for: control) as NSString
             width = max(width, name.size(withAttributes: [.font: nameFont]).width)
             width = max(width, value.size(withAttributes: [.font: valueFont]).width + 16)
@@ -181,7 +206,7 @@ final class ControllerConfigView: NSView {
         var lastLane = CGFloat.greatestFiniteMagnitude
 
         for (index, control) in list.enumerated() {
-            let a = control.anchor(playStation: isPlayStation)
+            let a = control.anchor(on: artFamily)
             let anchor = CGPoint(x: artRect.midX + a.x * artRect.width / 2,
                                  y: artRect.midY + a.y * artRect.height / 2)
             let rowY = top - spacing * CGFloat(index)
@@ -209,7 +234,7 @@ final class ControllerConfigView: NSView {
     // è libero — le due colonne stanno ai bordi — quindi non disturba niente.
     private func layoutAbove(artRect: NSRect, canvas: NSRect) {
         for control in controls(.above) {
-            let a = control.anchor(playStation: isPlayStation)
+            let a = control.anchor(on: artFamily)
             let anchor = CGPoint(x: artRect.midX + a.x * artRect.width / 2,
                                  y: artRect.midY + a.y * artRect.height / 2)
             let value = valueText(for: control) as NSString
@@ -276,7 +301,7 @@ final class ControllerConfigView: NSView {
                                y: row.token.midY - valueSize.height / 2),
                    withAttributes: valueAttrs)
 
-        let name = row.control.name(playStation: isPlayStation) as NSString
+        let name = row.control.name(for: family) as NSString
         let nameSize = name.size(withAttributes: nameAttrs)
         let nameX: CGFloat
         switch row.control.side {
@@ -312,7 +337,7 @@ final class ControllerConfigView: NSView {
             return (attributed, ceil(bounds.height))
         }
 
-        let name = control.name(playStation: isPlayStation)
+        let name = control.name(for: family)
         let blocks = [
             block(String(format: L.t("capture.title"), name),
                   .systemFont(ofSize: 17, weight: .semibold), .labelColor),

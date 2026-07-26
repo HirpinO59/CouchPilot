@@ -36,12 +36,12 @@ Written in Swift with **zero external dependencies** and **zero data collection*
 - **Scrolling** (vertical and horizontal) on the right stick
 - **Media keys**: play/pause, volume with hold-to-repeat, previous/next track
 - **Mission Control, Spaces, Show Desktop** — invoked through *your* configured macOS shortcuts, so remappings are respected
-- **Precision mode** (hold R2, ¼ speed) and **turbo** (hold L2, ×2) for cursor and scrolling
+- **Precision mode** (hold RT, ¼ speed) and **turbo** (hold LT, ×2) for cursor and scrolling
 - **Every button is remappable** from a visual keybinds screen, and the binding is *recorded, not picked from a list*: click the action next to the drawing of *your* controller, take one of the three suggestions for that button, or hit **Record input** and press any key, key combination or mouse button — it gets copied verbatim. A button can also **open an app** — Steam, CrossOver, anything in Applications. 12 buttons, plus each stick's movement (cursor, scroll or nothing) set separately from the stick click
 - **Controller battery indicator** in the menu, macOS style
 - **Auto-pause in games**: when a game or a chosen app (GeForce Now and Steam are preloaded) is frontmost, CouchPilot steps aside and the controller belongs to the game
 - **Localized**: English, Italian, Spanish, Simplified Chinese — follows the system language by default
-- **Quick guide** on first launch: an intro card, the on/off command, and the keybinds screen — with the diagram and button names matching the controller you actually have (View + Menu on Xbox, Create + Options on DualSense). Recallable any time from the menu
+- **Quick guide** on first launch: an intro card, the on/off command, and the keybinds screen — with the diagram and button names matching the controller you actually have (View + Menu on Xbox, Create + Options on DualSense, − and + on 8BitDo pads). Recallable any time from the menu
 - Global on/off: hold **View + Menu** together for 2 seconds, both ways. Each of the two also has its own job when pressed alone — View is remappable, Menu opens the menu bar menu
 
 ## Controls
@@ -57,8 +57,8 @@ Written in Swift with **zero external dependencies** and **zero data collection*
 | D-pad up/down | Volume up/down (hold to repeat) — configurable |
 | D-pad left/right | Previous / next track — configurable |
 | LB / RB | Previous / next Space |
-| R2 (hold) | Precision: ¼ speed |
-| L2 (hold) | Turbo: ×2 speed |
+| RT / R2 (hold) | Precision: ¼ speed |
+| LT / L2 (hold) | Turbo: ×2 speed |
 | L3 / R3 | Configurable — defaults: Mute / Middle click |
 | View (⧉) alone | Show Desktop — remappable. Fires on release, so it doesn't go off when View is part of the on/off combo |
 | Menu (☰) alone | Opens the CouchPilot menu bar menu — fixed, not remappable |
@@ -71,13 +71,13 @@ The app activates when a controller connects and deactivates when it disconnects
 ## Requirements
 
 - macOS 14 or later
-- A game controller macOS recognises as an extended gamepad: Xbox Wireless, DualSense, DualShock 4, Switch Pro and MFi pads. Button names differ across brands but the layout maps to the same positions (A = Cross, View = Create/Share, Menu = Options/Start). Developed and tested on an Xbox Wireless Controller.
+- A game controller macOS recognises as an extended gamepad: Xbox Wireless, DualSense, DualShock 4, Switch Pro and MFi pads. Button names differ across brands but the layout maps to the same positions (A = Cross, View = Create/Share, Menu = Options/Start), and CouchPilot uses the names printed on the pad it detects. Developed and tested on an Xbox Wireless Controller; the 8BitDo Ultimate Wireless has been confirmed working by a user.
 
 ## Install
 
 ### From a release
 
-1. Download `CouchPilot-1.0.1.dmg` from [Releases](../../releases), open it and drag **CouchPilot** onto the **Applications** shortcut.
+1. Download `CouchPilot-1.1.0.dmg` from [Releases](../../releases), open it and drag **CouchPilot** onto the **Applications** shortcut.
 
 2. **Open it once and let macOS refuse.** Double-click CouchPilot in Applications; a dialog says it can't be opened because Apple can't check it for malicious software. Click **Done** — this step is not optional, it is what makes the next one appear.
 
@@ -122,7 +122,7 @@ Requires the Xcode Command Line Tools (`xcode-select --install`). The script bui
 
 ## Settings
 
-Everything lives in the menu bar icon → **Settings**: cursor and scroll speed presets, stick deadzone, response curve, R2/L2 factors, excluded apps, auto-pause in games, language, reset. Changes take effect immediately. Button assignments have their own screen, **Keybinds**.
+Everything lives in the menu bar icon → **Settings**: cursor and scroll speed presets, stick deadzone, response curve, trigger factors, excluded apps, auto-pause in games, language, reset. Changes take effect immediately. Button assignments have their own screen, **Keybinds**.
 
 Advanced values outside the presets can be set from the terminal (`UserDefaults` domain `com.hirpino.couchpilot`):
 
@@ -137,8 +137,8 @@ defaults write com.hirpino.couchpilot maxSpeed -float 1800
 | `maxSpeed` | 1400 | Max cursor speed (px/s) |
 | `scrollDeadzone` | 0.20 | Deadzone of the scroll stick |
 | `scrollSpeed` | 700 | Max scroll speed (px/s) |
-| `precisionFactor` | 0.25 | Speed multiplier while R2 is held |
-| `boostFactor` | 2.0 | Speed multiplier while L2 is held |
+| `precisionFactor` | 0.25 | Speed multiplier while the right trigger is held |
+| `boostFactor` | 2.0 | Speed multiplier while the left trigger is held |
 | `actionL3` / `actionR3` | mute / middleClick | Stick-button actions |
 | `actionDpadUp` … `actionDpadRight` | volume / track | D-pad actions, `none` to leave the direction free |
 | `excludedApps` | GeForce Now, Steam | Bundle ids that auto-pause CouchPilot |
@@ -162,7 +162,7 @@ The Accessibility permission is used to *generate* mouse and keyboard events. Co
 
 ## Roadmap
 
-Per-app profiles (1.1)
+Per-app profiles (1.2) · layouts for more controllers (1.2)
 
 ## Feedback
 
