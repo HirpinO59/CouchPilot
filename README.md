@@ -98,14 +98,27 @@ CouchPilot lives in the menu bar: it has **no Dock icon and no window**, so it w
 
 Because CouchPilot is **not notarized**. Notarizing means uploading each build to Apple for an automated malware scan, and that requires a paid Apple Developer Program membership (99 €/year). This is a free app that collects nothing and makes no money, so it doesn't have one.
 
-The app *is* code-signed, and the signature is intact — you can check it yourself before trusting it:
+The app *is* code-signed, and you can check that yourself before trusting it. **Check the identity, not just the integrity** — this matters, and it's worth being precise about why:
 
 ```bash
-codesign --verify --deep --strict --verbose=2 /Applications/CouchPilot.app
-spctl -a -vvv /Applications/CouchPilot.app
+# who signed it — this is the one that proves the build came from me
+codesign --verify --verbose=2 \
+  -R 'identifier "com.hirpino.couchpilot" and anchor apple generic and certificate leaf[subject.OU] = "74F689QXZ2"' \
+  /Applications/CouchPilot.app
 ```
 
-The first command confirms nothing has been tampered with since it was built. The second will say `rejected`: that is Gatekeeper reporting the missing notarization, not a problem with the app.
+That must print **`explicit requirement satisfied`**. It checks the bundle identifier, that the certificate chains up to Apple's root, and that the signing team is `74F689QXZ2` — mine.
+
+`codesign --verify --deep --strict` on its own is **not** enough, and it would be misleading to suggest otherwise: it only proves a bundle is internally consistent with whatever signature it carries. Anyone can modify the app, re-sign it ad-hoc, and it will pass that check — an ad-hoc signature carries no identity at all. Only the requirement check above ties the binary to a specific signer.
+
+The releases also publish the **SHA-256** of the DMG, and the disk image itself is signed by the same team, so you can check the container before you even mount it:
+
+```bash
+shasum -a 256 CouchPilot-1.1.0.dmg
+codesign --verify --verbose=2 CouchPilot-1.1.0.dmg
+```
+
+For completeness: `spctl -a -vvv /Applications/CouchPilot.app` will say `rejected`. That is Gatekeeper reporting the missing notarization, not tampering. And note what the certificate is — an **Apple Development** certificate, not a Developer ID: it identifies me, but it is not the kind Apple issues for distribution, which is the honest limit of what any of this proves.
 
 If you'd rather not take anyone's word for it, **build it yourself** from the section below — the source is all here, it takes one command, and a build signed on your own Mac raises no warnings at all.
 </details>
@@ -118,7 +131,9 @@ cd CouchPilot
 ./build.sh install   # builds and installs into /Applications (plain ./build.sh only builds)
 ```
 
-Requires the Xcode Command Line Tools (`xcode-select --install`). The script builds with Swift Package Manager, assembles the bundle, generates the icon from code and signs with whatever identity it finds in your keychain (ad-hoc otherwise).
+Requires the Xcode Command Line Tools (`xcode-select --install`). The script builds with Swift Package Manager, assembles the bundle, generates the icon from code and signs with whatever identity it finds in your keychain, falling back to ad-hoc so that a build still works on a Mac with no certificates at all.
+
+That fallback is for *your* local builds. **Published releases are never ad-hoc**: they are signed with the Apple Development certificate of team `74F689QXZ2` and carry a trusted timestamp, which is what the requirement check above verifies. If you build locally without a certificate, your copy will be ad-hoc signed and macOS will make you re-grant Accessibility on every rebuild.
 
 ## Settings
 

@@ -26,17 +26,25 @@ Include the app version (menu → the version is in the pre-filled report), your
 Releases are code-signed but **not notarized** — notarization requires a paid Apple Developer membership, which this free app doesn't have. That means macOS will warn you on first launch, and it also means you should check what you got:
 
 ```bash
-# the signature is intact and nothing was tampered with after building
-codesign --verify --deep --strict --verbose=2 /Applications/CouchPilot.app
+# the check that actually proves the build came from me: identifier, Apple
+# chain of trust, and signing team 74F689QXZ2. Must print
+# "explicit requirement satisfied"
+codesign --verify --verbose=2 \
+  -R 'identifier "com.hirpino.couchpilot" and anchor apple generic and certificate leaf[subject.OU] = "74F689QXZ2"' \
+  /Applications/CouchPilot.app
 
-# who signed it
-codesign -dv --verbose=4 /Applications/CouchPilot.app 2>&1 | grep Authority
+# the disk image is signed by the same team, so it can be checked unmounted
+codesign --verify --verbose=2 ~/Downloads/CouchPilot-1.1.0.dmg
 
-# the file matches the SHA-256 published in the release notes
-shasum -a 256 ~/Downloads/CouchPilot-1.0.0.dmg
+# and it matches the SHA-256 published in the release notes
+shasum -a 256 ~/Downloads/CouchPilot-1.1.0.dmg
 ```
 
+**Why the requirement check and not just `codesign --verify --deep --strict`:** that command only proves a bundle is internally consistent with whatever signature it carries. An ad-hoc signature carries no identity, so anyone can modify this app, re-sign it ad-hoc, and pass that check. Verified here: a released build re-signed ad-hoc still passes `--deep --strict`, and fails the requirement above with `code failed to satisfy specified code requirement(s)`. Integrity and provenance are two different questions, and only the second one tells you who built the thing.
+
 `spctl -a` will say `rejected`. That is Gatekeeper reporting the missing notarization, not a problem with the bundle.
+
+**The honest limit of all this:** the certificate is an *Apple Development* certificate, not a Developer ID. It identifies me and chains to Apple's root, but it is not the type Apple issues for distributing software, and it expires in March 2027 (builds carry a trusted timestamp, so signatures made before then stay verifiable). If none of that is enough for you — reasonably — build from source and trust your own machine instead.
 
 If you'd rather not trust a download at all, build it yourself: `./build.sh install` signs with an identity from your own keychain and raises no warnings.
 
